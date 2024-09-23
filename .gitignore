@@ -1,0 +1,9 @@
+# Ignorar arquivos de log
+*.log
+
+# Ignorar diretórios de build
+/build/
+node_modules/
+
+# Ignorar arquivos de configuração local
+*.env
