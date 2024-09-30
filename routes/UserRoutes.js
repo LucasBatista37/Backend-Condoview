@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router()
 
 //Controller
-const {register, login, getCurrentUser, update, getuserById, getUserById} = require("../controllers/UserController");
+const {register, login, getCurrentUser, update, getUserById} = require("../controllers/UserController");
 
 //Middleweres
 const validate = require("../middlewares/handleValidation");
