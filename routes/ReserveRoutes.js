@@ -20,7 +20,7 @@ router.put("/reserve/:id", authGuard, validate, updateReserve);
 
 router.get("/admin/reserve", authGuard, getReserves); 
 router.get("/admin/reserve/:id", authGuard, getReserveById); 
-router.delete("/admin/reserve/:id", authGuard, adminGuard, deleteReserve); 
-router.post("/admin/reserve/approve/:id", authGuard, adminGuard, approveReserve); 
+router.delete("/admin/reserve/:id", authGuard, deleteReserve); 
+router.post("/admin/reserve/approve/:id", authGuard, approveReserve); 
 
 module.exports = router;
