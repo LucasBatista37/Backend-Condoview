@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 
 const jwtSecret = process.env.JWT_SECRET;
 
-//Gerar token de usuário
 const genereteToken = (id) => {
   return jwt.sign({ id }, jwtSecret, {
     expiresIn: "7d",
@@ -14,9 +13,8 @@ const genereteToken = (id) => {
 };
 
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
-  //check if user exist
   const user = await User.findOne({ email });
 
   if (user) {
@@ -24,15 +22,14 @@ const register = async (req, res) => {
     return;
   }
 
-  //generate password hash
   const salt = await bcrypt.genSalt();
   const passwordHash = await bcrypt.hash(password, salt);
 
-  // create user
   const newUser = await User.create({
     name,
     email,
     password: passwordHash,
+    role: role || 'morador', 
   });
 
   if (!newUser) {
@@ -57,13 +54,11 @@ const login = async (req, res) => {
     return;
   }
 
-  //check if password matches
   if (!(await bcrypt.compare(password, user.password))) {
     res.status(422).json({ erros: ["Senha inválida"] });
     return;
   }
 
-  //Return user with token
   res.status(201).json({
     _id: user._id,
     profileImage: user.profileImage,
@@ -71,14 +66,12 @@ const login = async (req, res) => {
   });
 };
 
-//Get current logged in user
 const getCurrentUser = async (req, res) => {
   const user = req.user;
 
   res.status(200).json(user);
 };
 
-//Update an user
 const update = async (req, res) => {
   const { name, password, bio } = req.body;
 
@@ -118,7 +111,6 @@ const update = async (req, res) => {
   res.status(200).json(user);
 };
 
-// Get user by id
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
@@ -126,7 +118,7 @@ const getUserById = async (req, res) => {
     const user = await User.findById(new mongoose.Types.ObjectId(id)).select(
       "-password"
     );
-    // Check if user exists
+
     if (!user) {
         res.status(404).json({ errors: ["Usuário não encontrado!"] });
         return;
