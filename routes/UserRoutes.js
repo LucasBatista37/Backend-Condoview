@@ -3,6 +3,7 @@ const router = express.Router()
 
 //Controller
 const {register, login, getCurrentUser, update, getUserById} = require("../controllers/UserController");
+const { associateUserToCondominium } = require("../controllers/AssociateUserToCondominium");
 
 //Middleweres
 const validate = require("../middlewares/handleValidation");
@@ -16,5 +17,6 @@ router.post("/login", loginValidation(), validate, login);
 router.get("/profile", authGuard, getCurrentUser);
 router.put("/", authGuard, userUpdateValidation(), validate, imageUpload.single("profileImage"), update);
 router.get("/:id", getUserById)
+router.post("/admin/associate", authGuard, associateUserToCondominium);
 
 module.exports = router;   
