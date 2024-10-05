@@ -25,7 +25,7 @@ const ocorrenciaValidation = () => {
                 return true;
             }),
         
-        body("imagemPath")
+        body("imagem")
             .optional()
             .isString()
             .withMessage("O caminho da imagem deve ser uma string."),

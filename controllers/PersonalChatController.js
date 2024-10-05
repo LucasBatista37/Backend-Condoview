@@ -1,4 +1,5 @@
 const PersonalChatMessage = require("../models/PersonalChat");
+const User = require("../models/User"); 
 const mongoose = require("mongoose");
 
 const sendPersonalMessage = async (req, res) => {
@@ -7,10 +8,22 @@ const sendPersonalMessage = async (req, res) => {
     const image = req.file ? req.file.path : null; 
 
     try {
-        const newMessage = await PersonalChatMessage.create({ sender, receiver, message, image });
+        const senderUser = await User.findById(sender);
+        if (!senderUser || !senderUser.condominium) {
+            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
+        const newMessage = await PersonalChatMessage.create({
+            sender,
+            receiver,
+            message,
+            image,
+            condominiumId: senderUser.condominium, 
+        });
+
         res.status(201).json(newMessage);
     } catch (error) {
-        res.status(422).json({ errors: ["Erro ao enviar a mensagem."] });
+        res.status(422).json({ errors: ["Erro ao enviar a mensagem.", error.message] });
     }
 };
 

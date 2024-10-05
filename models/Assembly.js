@@ -1,30 +1,38 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const AssemblySchema = new Schema({
+const AssemblySchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    condominiumId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Condominium",
+      required: true,
+    },
     title: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     description: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     date: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     imagePath: {
-        type: String,
+      type: String,
     },
-    approved: {
-        type: Boolean,
-        default: false,
-    },
-}, 
-{
+  },
+  {
     timestamps: true,
-});
+  }
+);
 
 const Assembly = mongoose.model("Assembly", AssemblySchema);
 

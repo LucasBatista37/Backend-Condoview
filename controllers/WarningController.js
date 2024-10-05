@@ -1,21 +1,33 @@
 const Notice = require("../models/Warning");
+const User = require("../models/User"); 
 const mongoose = require("mongoose");
 
 const createNotice = async (req, res) => {
     const { title, message, date, imagePath } = req.body;
+    const userId = req.user._id; 
 
     try {
+        const user = await User.findById(userId);
+        console.log("Usuário encontrado:", user);
+
+        if (!user || !user.condominium) {
+            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
         const newNotice = await Notice.create({
             title,
             message,
             date,
             imagePath,
             approved: false,
+            userId: userId, 
+            condominiumId: user.condominium,
         });
 
         res.status(201).json(newNotice);
     } catch (error) {
-        res.status(422).json({ errors: ["Houve um erro ao criar o aviso."] });
+        console.error("Erro ao criar o aviso:", error);
+        res.status(500).json({ errors: ["Houve um erro ao criar o aviso.", error.message] });
     }
 };
 

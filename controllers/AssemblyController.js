@@ -1,23 +1,36 @@
-const Assembly = require("../models/Assembly");
+const User = require('../models/User');
+const Assembly = require('../models/Assembly');
 const mongoose = require("mongoose");
 
 const createAssembly = async (req, res) => {
     const { title, description, date, imagePath } = req.body;
 
+    const userId = req.user._id; 
+
     try {
+        const user = await User.findById(userId);
+        console.log("Usuário encontrado:", user);
+
+                if (!user || !user.condominium) {
+            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
         const newAssembly = await Assembly.create({
             title,
             description,
             date,
             imagePath,
-            approved: false,
+            condominiumId: user.condominium, 
+            userId: userId, 
         });
 
         res.status(201).json(newAssembly);
     } catch (error) {
-        res.status(422).json({ errors: ["Houve um erro ao criar a assembleia."] });
+        console.error("Erro ao criar a assembleia:", error);
+        res.status(500).json({ errors: ["Houve um erro ao criar a assembleia.", error.message] });
     }
 };
+
 
 const getAssemblies = async (req, res) => {
     try {

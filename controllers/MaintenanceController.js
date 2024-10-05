@@ -1,21 +1,34 @@
-const Maintenance = require("../models/Maintenance");
+const User = require('../models/User'); 
+const Maintenance = require('../models/Maintenance'); 
 const mongoose = require("mongoose");
 
 const createMaintenance = async (req, res) => {
     const { type, descriptionMaintenance, dataMaintenance, imagePath } = req.body;
+    
+    const userId = req.user._id;
 
     try {
+        const user = await User.findById(userId);
+        console.log("Usuário encontrado:", user);
+
+        if (!user || !user.condominium) {
+            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
         const newMaintenance = await Maintenance.create({
             type,
             descriptionMaintenance,
             dataMaintenance,
             imagePath,
             approvedMaintenance: false, 
+            condominiumId: user.condominium,
+            userId: userId, 
         });
 
         res.status(201).json(newMaintenance);
     } catch (error) {
-        res.status(422).json({ errors: ["Houve um erro ao criar a manutenção."] });
+        console.error("Erro ao criar a manutenção:", error);
+        res.status(500).json({ errors: ["Houve um erro ao criar a manutenção.", error.message] });
     }
 };
 

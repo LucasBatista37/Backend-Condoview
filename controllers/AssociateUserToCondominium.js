@@ -33,7 +33,6 @@ const associateUserToCondominium = async (req, res) => {
     }
 };
 
-
 module.exports = {
   associateUserToCondominium,
 };

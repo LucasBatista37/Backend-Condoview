@@ -1,23 +1,34 @@
-const Ocorrencia = require('../models/Occurrence');
+const mongoose = require("mongoose");
+const User = require("../models/User"); 
+const Occurrence = require("../models/Occurrence"); 
 
-const criarOcorrencia = async (req, res) => {
-    const { motivo, descricao, data } = req.body;
-    const imagemPath = req.file ? req.file.path : null; 
-
+async function criarOcorrencia(req, res) {
     try {
-        const novaOcorrencia = new Ocorrencia({
-            motivo,
-            descricao,
-            data,
-            imagemPath,
+        const userId = req.user._id;
+
+        const user = await User.findById(userId);
+        console.log('Usuário encontrado:', user); 
+
+        if (!user || !user.condominium) {
+            return res.status(400).json({ error: 'Usuário não associado a um condomínio.' });
+        }
+
+        const novaOcorrencia = new Occurrence({
+            motivo: req.body.motivo,
+            descricao: req.body.descricao,
+            data: req.body.data,
+            imagemPath: req.body.imagemPath,
+            condominiumId: user.condominium,
+            userId: userId 
         });
 
         await novaOcorrencia.save();
-        res.status(201).json(novaOcorrencia);
+        return res.status(201).json(novaOcorrencia);
     } catch (error) {
-        res.status(422).json({ errors: ['Erro ao criar a ocorrência.'] });
+        console.error('Erro ao criar a ocorrência:', error);
+        return res.status(500).json({ error: 'Erro ao criar a ocorrência.', details: error.message });
     }
-};
+}
 
 const obterOcorrencias = async (req, res) => {
     try {

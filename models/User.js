@@ -12,7 +12,7 @@ const userSchema = new Schema({
         enum: ['administrador', 'morador', 'sindico'], 
         default: 'morador', 
     },
-    condominium: { type: mongoose.Schema.Types.ObjectId, ref: 'Condominium' } // Adicione esta linha
+    condominium: { type: mongoose.Schema.Types.ObjectId, ref: 'Condominium' } 
 }, {
     timestamps: true
 });

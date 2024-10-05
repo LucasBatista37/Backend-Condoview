@@ -1,4 +1,5 @@
 const ChatMessage = require("../models/ChatMessage");
+const User = require("../models/User");
 const mongoose = require("mongoose");
 
 const sendMessage = async (req, res) => {
@@ -18,17 +19,23 @@ const sendMessage = async (req, res) => {
     }
 
     try {
+        const currentUser = await User.findById(user.id);
+        if (!currentUser || !currentUser.condominium) {
+            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
         const newMessage = await ChatMessage.create({
             userId: user.id,
             userName: user.name,
             message: message || "",
             imageUrl: imageUrl,
             fileUrl: fileUrl,
+            condominiumId: currentUser.condominium,
         });
 
         res.status(201).json(newMessage);
     } catch (error) {
-        res.status(500).json({ errors: ["Erro ao enviar a mensagem."] });
+        res.status(500).json({ errors: ["Erro ao enviar a mensagem.", error.message] });
     }
 };
 
