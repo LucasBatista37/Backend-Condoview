@@ -6,12 +6,12 @@ const OcorrenciaSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true, 
+      required: false, 
     },
     condominiumId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Condominium",
-      required: true,
+      required: false,
     }, 
     motivo: {
       type: String,

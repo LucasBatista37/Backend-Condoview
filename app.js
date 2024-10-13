@@ -3,10 +3,13 @@ require("dotenv").config()
 const express = require("express");
 const path = require("path");
 const cors = require("cors")
+const morgan = require('morgan');
 
 const port = process.env.PORT;
 
 const app = express();
+
+app.use(morgan('dev'));
 
 //Configuração Json e form data response
 app.use(express.json());

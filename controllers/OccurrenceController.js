@@ -4,22 +4,14 @@ const Occurrence = require("../models/Occurrence");
 
 async function criarOcorrencia(req, res) {
     try {
-        const userId = req.user._id;
-
-        const user = await User.findById(userId);
-        console.log('Usuário encontrado:', user); 
-
-        if (!user || !user.condominium) {
-            return res.status(400).json({ error: 'Usuário não associado a um condomínio.' });
-        }
+        console.log('Dados recebidos:', req.body);
+        console.log('Arquivo recebido:', req.file);  
 
         const novaOcorrencia = new Occurrence({
             motivo: req.body.motivo,
             descricao: req.body.descricao,
             data: req.body.data,
-            imagemPath: req.body.imagemPath,
-            condominiumId: user.condominium,
-            userId: userId 
+            imagemPath: req.file ? req.file.path : null,  
         });
 
         await novaOcorrencia.save();
@@ -32,11 +24,12 @@ async function criarOcorrencia(req, res) {
 
 const obterOcorrencias = async (req, res) => {
     try {
-        const ocorrencias = await Ocorrencia.find();
+        const ocorrencias = await Occurrence.find();
         res.status(200).json(ocorrencias);
     } catch (error) {
         res.status(500).json({ errors: ['Erro ao obter ocorrências.'] });
     }
+    console.log('Arquivo recebido:', req.file);
 };
 
 const atualizarOcorrencia = async (req, res) => {
@@ -45,7 +38,7 @@ const atualizarOcorrencia = async (req, res) => {
     const imagemPath = req.file ? req.file.path : null;
 
     try {
-        const ocorrencia = await Ocorrencia.findByIdAndUpdate(
+        const ocorrencia = await Occurrence.findByIdAndUpdate(
             id,
             { motivo, descricao, data, imagemPath },
             { new: true, runValidators: true }
@@ -65,7 +58,7 @@ const deletarOcorrencia = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const ocorrencia = await Ocorrencia.findByIdAndDelete(id);
+        const ocorrencia = await Occurrence.findByIdAndDelete(id);
 
         if (!ocorrencia) {
             return res.status(404).json({ errors: ['Ocorrência não encontrada.'] });
