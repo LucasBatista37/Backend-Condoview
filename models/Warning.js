@@ -18,10 +18,6 @@ const NoticeSchema = new Schema(
     imagePath: {
       type: String,
     },
-    approved: {
-      type: Boolean,
-      default: false,
-    },
     condominiumId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Condominium",

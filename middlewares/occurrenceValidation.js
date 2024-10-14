@@ -17,13 +17,6 @@ const ocorrenciaValidation = () => {
     body("data")
       .isISO8601()
       .withMessage("A data deve ser uma data válida (formato YYYY-MM-DD).")
-      .custom((value) => {
-        const date = new Date(value);
-        if (date < new Date()) {
-          throw new Error("A data não pode ser no passado.");
-        }
-        return true;
-      }),
   ];
 };
 
