@@ -16,19 +16,7 @@ const assemblyValidation = () => {
         
         body("date")
             .isISO8601()
-            .withMessage("A data deve ser uma data válida (formato YYYY-MM-DD).")
-            .custom((value) => {
-                const date = new Date(value);
-                if (date < new Date()) {
-                    throw new Error("A data não pode ser no passado.");
-                }
-                return true;
-            }),
-        
-        body("imagePath")
-            .optional()
-            .isString()
-            .withMessage("O caminho da imagem deve ser uma string."),
+            .withMessage("A data deve ser uma data válida (formato YYYY-MM-DD)."),
         
         body("approved")
             .optional()

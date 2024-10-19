@@ -17,9 +17,9 @@ const PackageSchema = new Schema({
     imagePath: {
         type: String,
     },
-    type: {
+    status: {
         type: String,
-        required: true,
+        required: false,
     },
     userId: {
         type: Schema.Types.ObjectId,

@@ -3,7 +3,7 @@ const Assembly = require('../models/Assembly');
 const mongoose = require("mongoose");
 
 const createAssembly = async (req, res) => {
-    const { title, description, date, imagePath } = req.body;
+    const { title, description, date} = req.body;
 
     const userId = req.user._id; 
 
@@ -11,17 +11,28 @@ const createAssembly = async (req, res) => {
         const user = await User.findById(userId);
         console.log("Usuário encontrado:", user);
 
-                if (!user || !user.condominium) {
+        if (!user || !user.condominium) {
             return res.status(400).json({ error: "Usuário não associado a um condomínio." });
+        }
+
+        const currentDateTime = new Date();
+        let status = "Pendente";
+
+        if (new Date(date) < currentDateTime) {
+            status = "Encerrada"; 
+        } else if (new Date(date) > currentDateTime) {
+            status = "Pendente"; 
+        } else {
+            status = "Em Andamento";
         }
 
         const newAssembly = await Assembly.create({
             title,
             description,
             date,
-            imagePath,
             condominiumId: user.condominium, 
             userId: userId, 
+            status, 
         });
 
         res.status(201).json(newAssembly);
@@ -31,24 +42,36 @@ const createAssembly = async (req, res) => {
     }
 };
 
-
 const getAssemblies = async (req, res) => {
     try {
         const assemblies = await Assembly.find();
+
+        const currentDateTime = new Date();
+        assemblies.forEach((assembly) => {
+            if (new Date(assembly.date) < currentDateTime) {
+                assembly.status = "Encerrada";
+            } else if (new Date(assembly.date) > currentDateTime) {
+                assembly.status = "Pendente";
+            } else {
+                assembly.status = "Em Andamento";
+            }
+        });
+
         res.status(200).json(assemblies);
     } catch (error) {
-        res.status(500).json({ errors: ["Erro ao obter assembleias."] });
+        console.error("Erro ao buscar assembleias:", error);
+        res.status(500).json({ errors: ["Houve um erro ao buscar assembleias.", error.message] });
     }
 };
 
 const updateAssembly = async (req, res) => {
     const { id } = req.params;
-    const { title, description, date, imagePath } = req.body;
+    const { title, description, date} = req.body;
 
     try {
         const assembly = await Assembly.findByIdAndUpdate(
             id,
-            { title, description, date, imagePath },
+            { title, description, date},
             { new: true, runValidators: true }
         );
 

@@ -25,8 +25,10 @@ const AssemblySchema = new Schema(
       type: Date,
       required: true,
     },
-    imagePath: {
+    status: {
       type: String,
+      enum: ["Pendente", "Em Andamento", "Encerrada"],
+      default: "Pendente", 
     },
   },
   {
