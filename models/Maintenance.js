@@ -28,15 +28,17 @@ const MaintenanceSchema = new Schema(
     imagePath: {
       type: String,
     },
-    approvedMaintenance: {
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      enum: ['pendente', 'aprovado', 'rejeitado'], 
+      default: 'pendente',  
     },
   },
   {
     timestamps: true,
   }
 );
+
 
 const Maintenance = mongoose.model("Maintenance", MaintenanceSchema);
 

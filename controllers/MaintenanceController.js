@@ -1,81 +1,86 @@
-const User = require('../models/User'); 
-const Maintenance = require('../models/Maintenance'); 
+const User = require("../models/User");
+const Maintenance = require("../models/Maintenance");
 const mongoose = require("mongoose");
 
 const createMaintenance = async (req, res) => {
-    const { type, descriptionMaintenance, dataMaintenance, imagePath } = req.body;
-    
-    const userId = req.user._id;
+  const { type, descriptionMaintenance, dataMaintenance } = req.body;
 
-    try {
-        const user = await User.findById(userId);
-        console.log("Usuário encontrado:", user);
+  const userId = req.user._id;
 
-        if (!user || !user.condominium) {
-            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
-        }
-
-        const newMaintenance = await Maintenance.create({
-            type,
-            descriptionMaintenance,
-            dataMaintenance,
-            imagePath,
-            approvedMaintenance: false, 
-            condominiumId: user.condominium,
-            userId: userId, 
-        });
-
-        res.status(201).json(newMaintenance);
-    } catch (error) {
-        console.error("Erro ao criar a manutenção:", error);
-        res.status(500).json({ errors: ["Houve um erro ao criar a manutenção.", error.message] });
+  try {
+    const user = await User.findById(userId);
+    if (!user || !user.condominium) {
+      return res
+        .status(400)
+        .json({ error: "Usuário não associado a um condomínio." });
     }
+
+    const imagePath = req.file ? req.file.path : null;
+
+    const newMaintenance = await Maintenance.create({
+      type,
+      descriptionMaintenance,
+      dataMaintenance,
+      imagePath, 
+      status: "pendente", 
+      condominiumId: user.condominium,
+      userId: userId,
+    });
+
+    res.status(201).json(newMaintenance);
+  } catch (error) {
+    res.status(500).json({
+      errors: ["Houve um erro ao criar a manutenção.", error.message],
+    });
+  }
 };
 
 const getMaintenances = async (req, res) => {
-    try {
-        const maintenances = await Maintenance.find();
-        res.status(200).json(maintenances);
-    } catch (error) {
-        res.status(500).json({ errors: ["Erro ao obter manutenções."] });
-    }
+  try {
+    const maintenances = await Maintenance.find();
+    res.status(200).json(maintenances);
+  } catch (error) {
+    res.status(500).json({ errors: ["Erro ao obter manutenções."] });
+  }
 };
 
 const updateMaintenance = async (req, res) => {
-    const { id } = req.params;
-    const { type, descriptionMaintenance, dataMaintenance, imagePath } = req.body;
+  const { id } = req.params;
+  const { type, descriptionMaintenance, dataMaintenance, imagePath } = req.body;
 
-    try {
-        const maintenance = await Maintenance.findByIdAndUpdate(
-            id,
-            { type, descriptionMaintenance, dataMaintenance, imagePath },
-            { new: true, runValidators: true } 
-        );
+  try {
+    const maintenance = await Maintenance.findByIdAndUpdate(
+      id,
+      { type, descriptionMaintenance, dataMaintenance, imagePath },
+      { new: true, runValidators: true }
+    );
 
-        if (!maintenance) {
-            return res.status(404).json({ errors: ["Manutenção não encontrada."] });
-        }
-
-        res.status(200).json(maintenance);
-    } catch (error) {
-        res.status(422).json({ errors: ["Erro ao atualizar a manutenção."] });
+    if (!maintenance) {
+      return res.status(404).json({ errors: ["Manutenção não encontrada."] });
     }
+
+    res.status(200).json(maintenance);
+  } catch (error) {
+    res.status(422).json({ errors: ["Erro ao atualizar a manutenção."] });
+  }
 };
 
 const deleteMaintenance = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const maintenance = await Maintenance.findByIdAndDelete(new mongoose.Types.ObjectId(id));
+  try {
+    const maintenance = await Maintenance.findByIdAndDelete(
+      new mongoose.Types.ObjectId(id)
+    );
 
-        if (!maintenance) {
-            return res.status(404).json({ errors: ["Manutenção não encontrada."] });
-        }
-
-        res.status(200).json({ message: "Manutenção deletada com sucesso." });
-    } catch (error) {
-        res.status(500).json({ errors: ["Erro ao deletar a manutenção."] });
+    if (!maintenance) {
+      return res.status(404).json({ errors: ["Manutenção não encontrada."] });
     }
+
+    res.status(200).json({ message: "Manutenção deletada com sucesso." });
+  } catch (error) {
+    res.status(500).json({ errors: ["Erro ao deletar a manutenção."] });
+  }
 };
 
 const approveMaintenance = async (req, res) => {
@@ -88,11 +93,11 @@ const approveMaintenance = async (req, res) => {
             return res.status(404).json({ errors: ["Manutenção não encontrada."] });
         }
 
-        if (maintenance.approvedMaintenance) {
+        if (maintenance.status === 'aprovado') {
             return res.status(400).json({ errors: ["A manutenção já foi aprovada."] });
         }
 
-        maintenance.approvedMaintenance = true; 
+        maintenance.status = 'aprovado';  
         await maintenance.save();
 
         res.status(200).json(maintenance);
@@ -111,11 +116,11 @@ const rejectMaintenance = async (req, res) => {
             return res.status(404).json({ errors: ["Manutenção não encontrada."] });
         }
 
-        if (maintenance.approvedMaintenance === false) {
+        if (maintenance.status === 'rejeitado') {
             return res.status(400).json({ errors: ["A manutenção já foi rejeitada."] });
         }
 
-        maintenance.approvedMaintenance = false; 
+        maintenance.status = 'rejeitado'; 
         await maintenance.save();
 
         res.status(200).json(maintenance);
@@ -125,10 +130,10 @@ const rejectMaintenance = async (req, res) => {
 };
 
 module.exports = {
-    createMaintenance,
-    getMaintenances,
-    deleteMaintenance,
-    approveMaintenance,
-    rejectMaintenance, 
-    updateMaintenance,
+  createMaintenance,
+  getMaintenances,
+  deleteMaintenance,
+  approveMaintenance,
+  rejectMaintenance,
+  updateMaintenance,
 };
