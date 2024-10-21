@@ -17,7 +17,7 @@ const ReserveSchema = new Schema(
       type: String,
       required: true,
     },
-    description: {
+    descricao: {
       type: String,
       required: true,
     },
@@ -33,9 +33,10 @@ const ReserveSchema = new Schema(
       type: String,
       required: true,
     },
-    approved: {
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      enum: ["aprovado", "rejeitado", "pendente"],
+      default: "pendente",
     },
   },
   {

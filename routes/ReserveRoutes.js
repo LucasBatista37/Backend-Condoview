@@ -8,6 +8,7 @@ const {
     updateReserve,
     deleteReserve,
     approveReserve,
+    rejectReserve
 } = require("../controllers/ReserveController");
 
 const validate = require("../middlewares/handleValidation");
@@ -22,5 +23,7 @@ router.get("/admin/reserve", authGuard, getReserves);
 router.get("/admin/reserve/:id", authGuard, getReserveById); 
 router.delete("/admin/reserve/:id", authGuard, deleteReserve); 
 router.post("/admin/reserve/approve/:id", authGuard, approveReserve); 
+router.post("/admin/reserve/reject/:id", authGuard, rejectReserve);
+
 
 module.exports = router;
