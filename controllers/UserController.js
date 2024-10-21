@@ -13,30 +13,38 @@ const genereteToken = (id) => {
 };
 
 const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { nome, email, senha, role } = req.body;
+
+  console.log('Dados recebidos para registro:', { nome, email, senha, role });
 
   const user = await User.findOne({ email });
 
   if (user) {
+    console.log('Usuário já existe:', email);
     res.status(422).json({ errors: ["Por favor, utilize outro e-mail"] });
     return;
   }
 
   const salt = await bcrypt.genSalt();
-  const passwordHash = await bcrypt.hash(password, salt);
+  console.log('Salt gerado:', salt);
+  
+  const passwordHash = await bcrypt.hash(senha, salt);
+  console.log('Senha hasheada:', passwordHash); 
 
   const newUser = await User.create({
-    name,
+    nome,
     email,
-    password: passwordHash,
-    role: role || 'morador', 
+    senha: passwordHash,
+    role: role || 'morador',
   });
 
   if (!newUser) {
-    res
-      .status(422)
-      .json({ errors: "Houve um erro por favor tente novamente mais tarde." });
+    console.log('Erro ao criar novo usuário'); 
+    res.status(422).json({ errors: "Houve um erro, por favor tente novamente mais tarde." });
+    return;
   }
+
+  console.log('Novo usuário criado:', newUser);
 
   res.status(201).json({
     _id: newUser._id,
@@ -44,8 +52,9 @@ const register = async (req, res) => {
   });
 };
 
+
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, senha } = req.body;
 
   const user = await User.findOne({ email });
 
@@ -54,7 +63,7 @@ const login = async (req, res) => {
     return;
   }
 
-  if (!(await bcrypt.compare(password, user.password))) {
+  if (!(await bcrypt.compare(senha, user.senha))) {
     res.status(422).json({ erros: ["Senha inválida"] });
     return;
   }
@@ -73,7 +82,7 @@ const getCurrentUser = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { name, password, bio } = req.body;
+  const { name, senha } = req.body;
 
   let profileImage = null;
 
@@ -85,25 +94,21 @@ const update = async (req, res) => {
 
   const user = await User.findById(
     new mongoose.Types.ObjectId(reqUser._id)
-  ).select("-password");
+  ).select("-senha");
 
   if (name) {
     user.name = name;
   }
 
-  if (password) {
+  if (senha) {
     const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(password, salt);
+    const passwordHash = await bcrypt.hash(senha, salt);
 
-    user.password = passwordHash;
+    user.senha = passwordHash;
   }
 
   if (profileImage) {
     user.profileImage = profileImage;
-  }
-
-  if (bio) {
-    user.bio = bio;
   }
 
   await user.save();
@@ -116,7 +121,7 @@ const getUserById = async (req, res) => {
 
   try {
     const user = await User.findById(new mongoose.Types.ObjectId(id)).select(
-      "-password"
+      "-senha"
     );
 
     if (!user) {
