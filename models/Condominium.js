@@ -15,33 +15,6 @@ const condominiumSchema = new Schema({
     required: true,
     unique: true,
   },
-  units: {
-    type: Number,
-    required: true,
-  },
-  foundationDate: {
-    type: Date,
-    required: true,
-  },
-  contactPhone: {
-    type: String,
-    required: true,
-  },
-  contactEmail: {
-    type: String,
-    required: true,
-  },
-  blocks: {
-    type: Number,
-    default: 1, 
-  },
-  parkingSpots: {
-    type: Number,
-    default: 0,
-  },
-  rules: {
-    type: String,
-  },
 }, 
 {
   timestamps: true,

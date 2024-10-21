@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const createCondominium = async (req, res) => {
   try {
-    const { name, address, cnpj, units, foundationDate, contactPhone, contactEmail, blocks, parkingSpots, rules } = req.body;
+    const { name, address, cnpj } = req.body;
 
     const existingCondo = await Condominium.findOne({ cnpj });
     if (existingCondo) {
@@ -14,13 +14,6 @@ const createCondominium = async (req, res) => {
       name,
       address,
       cnpj,
-      units,
-      foundationDate,
-      contactPhone,
-      contactEmail,
-      blocks,
-      parkingSpots,
-      rules,
     });
 
     if (!newCondominium) {
