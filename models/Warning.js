@@ -18,11 +18,6 @@ const NoticeSchema = new Schema(
     imagePath: {
       type: String,
     },
-    condominiumId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Condominium",
-      required: true,
-    },
   },
   {
     timestamps: true,

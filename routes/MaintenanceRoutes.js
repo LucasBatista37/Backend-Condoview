@@ -25,15 +25,14 @@ const {
 
 const validate = require("../middlewares/handleValidation");
 const { maintenanceValidation } = require("../middlewares/maintenanceValidation");
-const authGuard = require("../middlewares/authGuard");
 const adminGuard = require("../middlewares/adminGuard");
 
-router.post("/maintenance", authGuard, upload.single("imagePath"), maintenanceValidation(), validate, createMaintenance);
-router.get("/admin/maintenance", authGuard, getMaintenances);
+router.post("/maintenance", upload.single("imagePath"), maintenanceValidation(), validate, createMaintenance);
+router.get("/admin/maintenance", getMaintenances);
 
-router.delete("/admin/maintenance/:id", authGuard, deleteMaintenance);
-router.post("/admin/maintenance/approve/:id", authGuard, approveMaintenance);
-router.post("/admin/maintenance/reject/:id", authGuard, rejectMaintenance);
-router.put("/admin/maintenance/:id", authGuard, upload.single("imagePath"), validate, updateMaintenance);
+router.delete("/admin/maintenance/:id" , deleteMaintenance);
+router.post("/admin/maintenance/approve/:id", approveMaintenance);
+router.post("/admin/maintenance/reject/:id", rejectMaintenance);
+router.put("/admin/maintenance/:id", upload.single("imagePath"), validate, updateMaintenance);
 
 module.exports = router;

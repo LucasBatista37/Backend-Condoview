@@ -1,20 +1,10 @@
-const User = require("../models/User");
 const Maintenance = require("../models/Maintenance");
 const mongoose = require("mongoose");
 
 const createMaintenance = async (req, res) => {
   const { type, descriptionMaintenance, dataMaintenance } = req.body;
 
-  const userId = req.user._id;
-
   try {
-    const user = await User.findById(userId);
-    if (!user || !user.condominium) {
-      return res
-        .status(400)
-        .json({ error: "Usuário não associado a um condomínio." });
-    }
-
     const imagePath = req.file ? req.file.path : null;
 
     const newMaintenance = await Maintenance.create({
@@ -23,8 +13,7 @@ const createMaintenance = async (req, res) => {
       dataMaintenance,
       imagePath, 
       status: "pendente", 
-      condominiumId: user.condominium,
-      userId: userId,
+      // Removido userId e condominiumId
     });
 
     res.status(201).json(newMaintenance);

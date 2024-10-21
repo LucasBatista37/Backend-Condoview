@@ -3,26 +3,16 @@ const Assembly = require('../models/Assembly');
 const mongoose = require("mongoose");
 
 const createAssembly = async (req, res) => {
-    const { title, description, date} = req.body;
-
-    const userId = req.user._id; 
+    const { title, description, date } = req.body;
 
     try {
-        const user = await User.findById(userId);
-        console.log("Usuário encontrado:", user);
-
-        if (!user || !user.condominium) {
-            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
-        }
-
+        // Remover a verificação do usuário
         const currentDateTime = new Date();
         let status = "Pendente";
 
         if (new Date(date) < currentDateTime) {
             status = "Encerrada"; 
-        } else if (new Date(date) > currentDateTime) {
-            status = "Pendente"; 
-        } else {
+        } else if (new Date(date) === currentDateTime) {
             status = "Em Andamento";
         }
 
@@ -30,9 +20,7 @@ const createAssembly = async (req, res) => {
             title,
             description,
             date,
-            condominiumId: user.condominium, 
-            userId: userId, 
-            status, 
+            status,
         });
 
         res.status(201).json(newAssembly);
@@ -66,12 +54,12 @@ const getAssemblies = async (req, res) => {
 
 const updateAssembly = async (req, res) => {
     const { id } = req.params;
-    const { title, description, date} = req.body;
+    const { title, description, date } = req.body;
 
     try {
         const assembly = await Assembly.findByIdAndUpdate(
             id,
-            { title, description, date},
+            { title, description, date },
             { new: true, runValidators: true }
         );
 

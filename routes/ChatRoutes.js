@@ -5,49 +5,47 @@ const router = express.Router();
 const { sendMessage, getMessages, deleteMessage } = require("../controllers/ChatController");
 const validate = require("../middlewares/handleValidation");
 const { chatValidation } = require("../middlewares/chatValidation");
-const authGuard = require("../middlewares/authGuard");
 
 // Configuração do armazenamento
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/chat");  
+        cb(null, "uploads/chat");
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}_${file.originalname}`);  
+        cb(null, `${Date.now()}_${file.originalname}`);
     },
 });
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
     if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true); 
+        cb(null, true);
     } else {
-        cb(new Error("Tipo de arquivo não suportado"), false);  
+        cb(new Error("Tipo de arquivo não suportado"), false);
     }
 };
 
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 1024 * 1024 * 5,  
+        fileSize: 1024 * 1024 * 5, 
     },
-    fileFilter: fileFilter, 
+    fileFilter: fileFilter,
 });
 
 router.post(
     "/chat",
-    authGuard,
     upload.fields([
-        { name: "image", maxCount: 1 }, 
+        { name: "image", maxCount: 1 },
         { name: "file", maxCount: 1 },
     ]),
-    chatValidation(),  
-    validate,          
-    sendMessage      
+    chatValidation(),
+    validate,
+    sendMessage
 );
 
-router.get("/admin/chat", authGuard, getMessages);
+router.get("/admin/chat", getMessages); 
 
-router.delete("/chat/:id", authGuard, deleteMessage);
+router.delete("/chat/:id", deleteMessage); 
 
 module.exports = router;

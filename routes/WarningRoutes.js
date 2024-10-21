@@ -26,11 +26,11 @@ const { noticeValidation } = require("../middlewares/warningValidation");
 const authGuard = require("../middlewares/authGuard");
 const adminGuard = require("../middlewares/adminGuard");
 
-router.post("/admin/notices", authGuard, upload.single("imagePath"), noticeValidation(), validate, createNotice);
-router.delete("/admin/notices/:id", authGuard, deleteNotice);
-router.put("/admin/notices/:id", authGuard, upload.single("imagePath"), validate, updateNotice);
+router.post("/admin/notices", upload.single("imagePath"), noticeValidation(), validate, createNotice);
+router.delete("/admin/notices/:id", deleteNotice);
+router.put("/admin/notices/:id", upload.single("imagePath"), validate, updateNotice);
 
-router.get("/admin/notices", authGuard, getNotices);
+router.get("/admin/notices", getNotices);
 
 
 module.exports = router;

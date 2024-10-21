@@ -13,17 +13,14 @@ const {
 
 const validate = require("../middlewares/handleValidation");
 const { reserveValidation } = require("../middlewares/reserveValidation");
-const authGuard = require("../middlewares/authGuard");
-const adminGuard = require("../middlewares/adminGuard");
 
-router.post("/reserve", authGuard, reserveValidation(), validate, createReserve);
-router.put("/reserve/:id", authGuard, validate, updateReserve); 
+router.post("/reserve", createReserve);
+router.put("/reserve/:id", validate, updateReserve); 
 
-router.get("/admin/reserve", authGuard, getReserves); 
-router.get("/admin/reserve/:id", authGuard, getReserveById); 
-router.delete("/admin/reserve/:id", authGuard, deleteReserve); 
-router.post("/admin/reserve/approve/:id", authGuard, approveReserve); 
-router.post("/admin/reserve/reject/:id", authGuard, rejectReserve);
-
+router.get("/reserve", getReserves); 
+router.get("/reserve/:id", getReserveById); 
+router.delete("/reserve/:id", deleteReserve); 
+router.post("/reserve/approve/:id", approveReserve); 
+router.post("/reserve/reject/:id", rejectReserve);
 
 module.exports = router;

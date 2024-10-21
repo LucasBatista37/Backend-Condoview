@@ -9,7 +9,6 @@ const {
     deletePackage,
 } = require('../controllers/PackageController');
 const { packageValidation, handleValidationErrors } = require('../middlewares/packageValidation');
-const authGuard = require('../middlewares/authGuard');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -22,11 +21,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/package', authGuard, upload.single('imagePath'), packageValidation(), handleValidationErrors, addPackage);
-router.get('/admin/package', authGuard, getPackages);
-router.get('/admin/package/:id', authGuard, getPackageById);
-router.put('/admin/package/:id', authGuard, upload.single('imagePath'), handleValidationErrors, updatePackage);
-router.delete('/admin/package/:id', authGuard, deletePackage);
+router.post('/package', upload.single('imagePath'), packageValidation(), handleValidationErrors, addPackage);
+router.get('/admin/package', getPackages);
+router.get('/admin/package/:id', getPackageById);
+router.put('/admin/package/:id', upload.single('imagePath'), handleValidationErrors, updatePackage);
+router.delete('/admin/package/:id', deletePackage);
 
 
 module.exports = router;

@@ -1,43 +1,45 @@
 const ChatMessage = require("../models/ChatMessage");
-const User = require("../models/User");
 const mongoose = require("mongoose");
 
-const sendMessage = async (req, res) => {
-    const { message } = req.body;
-    const { user } = req;
+    const sendMessage = async (req, res) => {
+        const { message } = req.body;
 
-    let imageUrl = null;
-    let fileUrl = null;
+        // Logs para verificar o que está sendo recebido
+        console.log("Dados recebidos:", req.body);
+        console.log("Arquivos recebidos:", req.files);
 
-    if (req.files) {
-        if (req.files.image) {
-            imageUrl = req.files.image[0].path;
+        let imageUrl = null;
+        let fileUrl = null;
+
+        if (req.files) {
+            if (req.files.image) {
+                imageUrl = req.files.image[0].path;
+                console.log("Imagem recebida:", imageUrl);
+            }
+            if (req.files.file) {
+                fileUrl = req.files.file[0].path;
+                console.log("Arquivo recebido:", fileUrl);
+            }
         }
-        if (req.files.file) {
-            fileUrl = req.files.file[0].path;
+
+        try {
+            const newMessage = await ChatMessage.create({
+                userId: req.user.id,
+                userName: req.user.name, 
+                message: message || "",
+                imageUrl: imageUrl,
+                fileUrl: fileUrl,
+                condominiumId: req.user.condominiumId, 
+            });
+
+            console.log("Mensagem criada com sucesso:", newMessage);
+
+            res.status(201).json(newMessage);
+        } catch (error) {
+            console.error("Erro ao enviar mensagem:", error);
+            res.status(500).json({ errors: ["Erro ao enviar a mensagem.", error.message] });
         }
-    }
-
-    try {
-        const currentUser = await User.findById(user.id);
-        if (!currentUser || !currentUser.condominium) {
-            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
-        }
-
-        const newMessage = await ChatMessage.create({
-            userId: user.id,
-            userName: user.name,
-            message: message || "",
-            imageUrl: imageUrl,
-            fileUrl: fileUrl,
-            condominiumId: currentUser.condominium,
-        });
-
-        res.status(201).json(newMessage);
-    } catch (error) {
-        res.status(500).json({ errors: ["Erro ao enviar a mensagem.", error.message] });
-    }
-};
+    };
 
 const getMessages = async (req, res) => {
     try {
@@ -51,20 +53,14 @@ const getMessages = async (req, res) => {
 const deleteMessage = async (req, res) => {
     const { id } = req.params;
 
-    console.log("ID recebido:", id);
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        console.log("ID inválido");
         return res.status(400).json({ errors: ["ID inválido."] });
     }
 
     try {
-        console.log("Tentando deletar a mensagem com ID:", id);
-
-        const message = await ChatMessage.findByIdAndDelete(new mongoose.Types.ObjectId(id));
+        const message = await ChatMessage.findByIdAndDelete(id);
 
         if (!message) {
-            console.log("Mensagem não encontrada para o ID:", id);
             return res.status(404).json({ errors: ["Mensagem não encontrada."] });
         }
         res.status(200).json({ message: "Mensagem deletada com sucesso." });

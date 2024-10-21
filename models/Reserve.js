@@ -3,16 +3,6 @@ const { Schema } = mongoose;
 
 const ReserveSchema = new Schema(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    condominiumId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Condominium",
-      required: true,
-    },
     area: {
       type: String,
       required: true,
