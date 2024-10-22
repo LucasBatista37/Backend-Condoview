@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
     const sendMessage = async (req, res) => {
         const { message } = req.body;
 
-        // Logs para verificar o que está sendo recebido
         console.log("Dados recebidos:", req.body);
         console.log("Arquivos recebidos:", req.files);
 

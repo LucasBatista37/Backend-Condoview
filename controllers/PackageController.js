@@ -10,7 +10,6 @@ const addPackage = async (req, res) => {
             time,
             imagePath,
             type,
-            // Removendo userId e condominiumId
         });
 
         await newPackage.save();

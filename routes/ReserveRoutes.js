@@ -2,25 +2,19 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    createReserve,
-    getReserves,
-    getReserveById,
-    updateReserve,
-    deleteReserve,
-    approveReserve,
-    rejectReserve
+  createReserve,
+  getReserves,
+  deleteReserve,
+  approveReserve,
+  rejectReserve,
+  updateReserve,
 } = require("../controllers/ReserveController");
 
-const validate = require("../middlewares/handleValidation");
-const { reserveValidation } = require("../middlewares/reserveValidation");
-
 router.post("/reserve", createReserve);
-router.put("/reserve/:id", validate, updateReserve); 
-
-router.get("/reserve", getReserves); 
-router.get("/reserve/:id", getReserveById); 
-router.delete("/reserve/:id", deleteReserve); 
-router.post("/reserve/approve/:id", approveReserve); 
-router.post("/reserve/reject/:id", rejectReserve);
+router.get("/admin/reserve", getReserves);
+router.delete("/admin/reserve/:id", deleteReserve);
+router.post("/admin/reserve/approve/:id", approveReserve);
+router.post("/admin/reserve/reject/:id", rejectReserve);
+router.put("/admin/reserve/:id", updateReserve);
 
 module.exports = router;

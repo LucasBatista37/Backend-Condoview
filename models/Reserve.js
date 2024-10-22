@@ -1,3 +1,4 @@
+// models/Reserve.js
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -15,18 +16,18 @@ const ReserveSchema = new Schema(
       type: Date,
       required: true,
     },
-    hourStart: {
-      type: String,
+    horarioInicio: {
+      type: String, // ou TimeOfDay, dependendo da sua implementação
       required: true,
     },
-    hourEnd: {
-      type: String,
+    horarioFim: {
+      type: String, // ou TimeOfDay, dependendo da sua implementação
       required: true,
     },
     status: {
       type: String,
-      enum: ["aprovado", "rejeitado", "pendente"],
-      default: "pendente",
+      enum: ['Pendente', 'Aprovada', 'Rejeitada'], 
+      default: 'Pendente',  
     },
   },
   {

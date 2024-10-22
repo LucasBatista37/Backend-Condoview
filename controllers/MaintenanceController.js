@@ -13,7 +13,6 @@ const createMaintenance = async (req, res) => {
       dataMaintenance,
       imagePath, 
       status: "pendente", 
-      // Removido userId e condominiumId
     });
 
     res.status(201).json(newMaintenance);

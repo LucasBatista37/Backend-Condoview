@@ -6,7 +6,6 @@ const createAssembly = async (req, res) => {
     const { title, description, date } = req.body;
 
     try {
-        // Remover a verificação do usuário
         const currentDateTime = new Date();
         let status = "Pendente";
 
