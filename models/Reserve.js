@@ -1,4 +1,3 @@
-// models/Reserve.js
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -17,11 +16,11 @@ const ReserveSchema = new Schema(
       required: true,
     },
     horarioInicio: {
-      type: String, // ou TimeOfDay, dependendo da sua implementação
+      type: String, 
       required: true,
     },
     horarioFim: {
-      type: String, // ou TimeOfDay, dependendo da sua implementação
+      type: String, 
       required: true,
     },
     status: {
