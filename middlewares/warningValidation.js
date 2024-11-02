@@ -18,10 +18,6 @@ const noticeValidation = () => {
             .isISO8601()
             .withMessage("A data deve ser uma data válida (formato YYYY-MM-DD)."),
         
-        body("imagePath")
-            .optional()
-            .isString()
-            .withMessage("O caminho da imagem deve ser uma string."),
     ];
 };
 

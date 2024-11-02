@@ -15,9 +15,6 @@ const NoticeSchema = new Schema(
       type: Date,
       required: true,
     },
-    imagePath: {
-      type: String,
-    },
   },
   {
     timestamps: true,
