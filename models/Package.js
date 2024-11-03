@@ -16,10 +16,11 @@ const PackageSchema = new Schema({
     },
     imagePath: {
         type: String,
+        default: '', 
     },
     status: {
         type: String,
-        required: false,
+        default: 'Pendente', 
     },
 }, 
 {

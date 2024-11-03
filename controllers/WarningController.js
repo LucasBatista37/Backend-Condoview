@@ -18,6 +18,7 @@ const createNotice = async (req, res) => {
 
         res.status(201).json(newNotice);
     } catch (error) {
+
         console.error("Erro ao criar o aviso:", error);
 
         res.status(500).json({ errors: ["Houve um erro ao criar o aviso.", error.message] });

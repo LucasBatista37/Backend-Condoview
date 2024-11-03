@@ -17,7 +17,6 @@ const noticeValidation = () => {
         body("date")
             .isISO8601()
             .withMessage("A data deve ser uma data válida (formato YYYY-MM-DD)."),
-        
     ];
 };
 

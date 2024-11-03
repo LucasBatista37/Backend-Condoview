@@ -27,7 +27,7 @@ const authGuard = require("../middlewares/authGuard");
 
 router.post("/assemblies", upload.single("imagePath"), assemblyValidation(), validate, createAssembly);
 router.get("/admin/assemblies", getAssemblies);
-router.delete("/admin/assemblies/:id", authGuard, deleteAssembly);
+router.delete("/admin/assemblies/:id", deleteAssembly);
 router.put("/admin/assemblies/:id", upload.single("imagePath"), validate, updateAssembly);
 
 module.exports = router;
