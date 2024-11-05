@@ -22,8 +22,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/ocorrencias', upload.single('imagem'), ocorrenciaValidation(), handleValidationErrors, criarOcorrencia);
-router.put('/ocorrencias/:id', upload.single('imagem'), handleValidationErrors, atualizarOcorrencia);
+router.post('/ocorrencias', upload.single('imagem'), ocorrenciaValidation(), criarOcorrencia);
+router.put('/ocorrencias/:id', upload.single('imagem'), atualizarOcorrencia);
 router.delete('/ocorrencias/:id', deletarOcorrencia);
 
 router.get('/admin/ocorrencias', obterOcorrencias);
