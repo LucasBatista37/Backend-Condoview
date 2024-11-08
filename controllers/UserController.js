@@ -40,11 +40,9 @@ const register = async (req, res) => {
 
     if (!newUser) {
       console.log("Erro ao criar novo usuário");
-      res
-        .status(422)
-        .json({
-          errors: "Houve um erro, por favor tente novamente mais tarde.",
-        });
+      res.status(422).json({
+        errors: "Houve um erro, por favor tente novamente mais tarde.",
+      });
       return;
     }
 
@@ -96,7 +94,7 @@ const getCurrentUser = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { nome, senha } = req.body; // Use "nome" em vez de "name"
+  const { nome, senha } = req.body;
 
   let profileImage = null;
 
@@ -117,7 +115,7 @@ const update = async (req, res) => {
     }
 
     if (nome) {
-      user.nome = nome; 
+      user.nome = nome;
     }
 
     if (senha) {
@@ -141,6 +139,12 @@ const update = async (req, res) => {
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
+  // Verificar se o ID é um ObjectId válido
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.log("ID inválido:", id);
+    return res.status(400).json({ errors: ["ID inválido fornecido."] });
+  }
+
   try {
     const user = await User.findById(new mongoose.Types.ObjectId(id)).select(
       "-senha"
@@ -148,13 +152,29 @@ const getUserById = async (req, res) => {
 
     if (!user) {
       console.log("Usuário não encontrado para o ID:", id);
-      res.status(404).json({ errors: ["Usuário não encontrado!"] });
-      return;
+      return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
     res.status(200).json(user);
   } catch (error) {
     console.error("Erro ao buscar usuário por ID:", error);
-    res.status(404).json({ errors: ["Usuário não encontrado!"] });
+    res.status(500).json({ errors: ["Erro interno do servidor."] });
+  }
+}
+
+const getAllUsers = async (req, res) => {
+  try {
+    // Busca todos os usuários, omitindo o campo "senha"
+    const users = await User.find().select("-senha");
+
+    if (!users || users.length === 0) {
+      console.log("Nenhum usuário encontrado");
+      return res.status(404).json({ errors: ["Nenhum usuário encontrado!"] });
+    }
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Erro ao buscar todos os usuários:", error);
+    res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
 
@@ -164,4 +184,5 @@ module.exports = {
   getCurrentUser,
   update,
   getUserById,
+  getAllUsers,
 };
