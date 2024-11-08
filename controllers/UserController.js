@@ -139,7 +139,6 @@ const update = async (req, res) => {
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
-  // Verificar se o ID é um ObjectId válido
   if (!mongoose.Types.ObjectId.isValid(id)) {
     console.log("ID inválido:", id);
     return res.status(400).json({ errors: ["ID inválido fornecido."] });
@@ -163,7 +162,6 @@ const getUserById = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    // Busca todos os usuários, omitindo o campo "senha"
     const users = await User.find().select("-senha");
 
     if (!users || users.length === 0) {
@@ -178,6 +176,30 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.log("ID inválido:", id);
+    return res.status(400).json({ errors: ["ID inválido fornecido."] });
+  }
+
+  try {
+    const user = await User.findByIdAndDelete(id);
+
+    if (!user) {
+      console.log("Usuário não encontrado para exclusão:", id);
+      return res.status(404).json({ errors: ["Usuário não encontrado!"] });
+    }
+
+    res.status(200).json({ message: "Usuário excluído com sucesso." });
+  } catch (error) {
+    console.error("Erro ao excluir usuário:", error);
+    res.status(500).json({ errors: ["Erro interno do servidor."] });
+  }
+};
+
+
 module.exports = {
   register,
   login,
@@ -185,4 +207,5 @@ module.exports = {
   update,
   getUserById,
   getAllUsers,
+  deleteUser,
 };

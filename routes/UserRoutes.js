@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); 
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 
@@ -30,6 +30,7 @@ const {
   update,
   getUserById,
   getAllUsers,
+  deleteUser, 
 } = require("../controllers/UserController");
 
 const {
@@ -52,17 +53,16 @@ router.get("/profile", authGuard, getCurrentUser);
 
 router.put(
   "/update",
-  authGuard, 
-  userUpdateValidation(), 
-  validate, 
-  imageUpload.single("profileImage"), 
-  update 
+  authGuard,
+  userUpdateValidation(),
+  validate,
+  imageUpload.single("profileImage"),
+  update
 );
 
 router.get("/:id", getUserById);
-
 router.get("/admin/all", getAllUsers);
-
+router.delete("/admin/:id", authGuard, deleteUser); 
 router.post("/admin/associate", authGuard, associateUserToCondominium);
 
 module.exports = router;
