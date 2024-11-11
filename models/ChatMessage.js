@@ -3,6 +3,11 @@ const { Schema } = mongoose;
 
 const ChatMessageSchema = new Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId, 
+      required: true,
+      ref: "User",
+    },
     userName: {
       type: String,
       required: true,
