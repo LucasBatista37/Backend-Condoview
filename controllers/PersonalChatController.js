@@ -4,21 +4,15 @@ const mongoose = require("mongoose");
 
 const sendPersonalMessage = async (req, res) => {
     const { receiver, message } = req.body;
-    const sender = req.user._id; 
-    const image = req.file ? req.file.path : null; 
+    const sender = req.user._id;
+    const image = req.file ? req.file.path : null;
 
     try {
-        const senderUser = await User.findById(sender);
-        if (!senderUser || !senderUser.condominium) {
-            return res.status(400).json({ error: "Usuário não associado a um condomínio." });
-        }
-
         const newMessage = await PersonalChatMessage.create({
             sender,
             receiver,
             message,
             image,
-            condominiumId: senderUser.condominium, 
         });
 
         res.status(201).json(newMessage);

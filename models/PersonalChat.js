@@ -21,11 +21,6 @@ const PersonalChatSchema = new Schema(
       type: String,
       required: false,
     },
-    condominiumId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Condominium",
-      required: true,
-    },
     timestamp: {
       type: Date,
       default: Date.now,
@@ -35,6 +30,7 @@ const PersonalChatSchema = new Schema(
     timestamps: true,
   }
 );
+
 
 const PersonalChatMessage = mongoose.model(
   "PersonalChatMessage",
