@@ -15,6 +15,10 @@ const userSchema = new Schema(
       default: 'morador',
     },
     condominium: { type: mongoose.Schema.Types.ObjectId, ref: 'Condominium' },
+    isEmailConfirmed: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

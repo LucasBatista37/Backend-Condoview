@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -11,50 +12,92 @@ const genereteToken = (id) => {
   });
 };
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const sendConfirmationEmail = (email, nome, token) => {
+  const confirmationUrl = `${process.env.FRONTEND_URL}/confirm/${token}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Confirmação de Cadastro",
+    text: `Olá ${nome},\n\nPor favor, confirme seu cadastro clicando no link abaixo:\n\n${confirmationUrl}\n\nAtenciosamente,\nEquipe`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Erro ao enviar e-mail:", error);
+    } else {
+      console.log("E-mail enviado com sucesso:", info.response);
+    }
+  });
+};
+
 const register = async (req, res) => {
   const { nome, email, senha, role } = req.body;
 
-  console.log("Dados recebidos para registro:", { nome, email, senha, role });
-
   try {
-    const user = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (user) {
-      console.log("Usuário já existe:", email);
+    if (existingUser) {
       res.status(422).json({ errors: ["Por favor, utilize outro e-mail"] });
       return;
     }
 
     const salt = await bcrypt.genSalt();
-    console.log("Salt gerado:", salt);
-
     const passwordHash = await bcrypt.hash(senha, salt);
-    console.log("Senha hasheada:", passwordHash);
 
-    const newUser = await User.create({
-      nome,
-      email,
-      senha: passwordHash,
-      role: role || "morador",
-    });
+    const token = jwt.sign(
+      { nome, email, senha: passwordHash, role },
+      jwtSecret,
+      { expiresIn: "1d" } 
+    );
 
-    if (!newUser) {
-      console.log("Erro ao criar novo usuário");
-      res.status(422).json({
-        errors: "Houve um erro, por favor tente novamente mais tarde.",
-      });
-      return;
-    }
+    sendConfirmationEmail(email, nome, token);
 
-    console.log("Novo usuário criado:", newUser);
-
-    res.status(201).json({
-      _id: newUser._id,
-      token: genereteToken(newUser._id),
+    res.status(200).json({
+      message: "Um e-mail de confirmação foi enviado. Verifique sua caixa de entrada.",
     });
   } catch (error) {
     console.error("Erro no registro:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
+  }
+};
+
+const confirmEmail = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+
+    const { nome, email, senha, role } = decoded;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(422).json({ errors: ["O e-mail já está registrado."] });
+    }
+
+    const newUser = await User.create({
+      nome,
+      email,
+      senha,
+      role: role || "morador",
+      isEmailConfirmed: true, 
+    });
+
+    res.status(201).json({
+      _id: newUser._id,
+      token: jwt.sign({ id: newUser._id }, jwtSecret, { expiresIn: "7d" }),
+      message: "Cadastro confirmado com sucesso!",
+    });
+  } catch (error) {
+    res.status(400).json({ errors: ["Token inválido ou expirado."] });
   }
 };
 
@@ -158,7 +201,7 @@ const getUserById = async (req, res) => {
     console.error("Erro ao buscar usuário por ID:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
-}
+};
 
 const getAllUsers = async (req, res) => {
   try {
@@ -199,7 +242,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-
 module.exports = {
   register,
   login,
@@ -208,4 +250,5 @@ module.exports = {
   getUserById,
   getAllUsers,
   deleteUser,
+  confirmEmail,
 };

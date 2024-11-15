@@ -31,6 +31,7 @@ const {
   getUserById,
   getAllUsers,
   deleteUser, 
+  confirmEmail,
 } = require("../controllers/UserController");
 
 const {
@@ -63,6 +64,8 @@ router.put(
 router.get("/:id", getUserById);
 router.get("/admin/all", getAllUsers);
 router.delete("/admin/:id", authGuard, deleteUser); 
+router.get("/confirm/:token", confirmEmail);
 router.post("/admin/associate", authGuard, associateUserToCondominium);
+
 
 module.exports = router;
