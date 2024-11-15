@@ -19,7 +19,7 @@ app.use(express.urlencoded({extended: false}));
 const routes = require("./routes/Router.js")
 
 // Cors
-app.use(cors({credentials: true, origin: "http://localhost:3000"}))
+app.use(cors({credentials: true, origin: "http://localhost:8080"}))
 
 // diretorio de Upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
