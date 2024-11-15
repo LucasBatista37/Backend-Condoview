@@ -27,7 +27,12 @@ const sendConfirmationEmail = (email, nome, token) => {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Confirmação de Cadastro",
-    text: `Olá ${nome},\n\nPor favor, confirme seu cadastro clicando no link abaixo:\n\n${confirmationUrl}\n\nAtenciosamente,\nEquipe`,
+    html: `
+      <p>Olá ${nome},</p>
+      <p>Por favor, confirme seu cadastro clicando no link abaixo:</p>
+      <a href="${confirmationUrl}">Confirmar Cadastro</a>
+      <p>Atenciosamente,<br>Equipe</p>
+    `,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -56,13 +61,14 @@ const register = async (req, res) => {
     const token = jwt.sign(
       { nome, email, senha: passwordHash, role },
       jwtSecret,
-      { expiresIn: "1d" } 
+      { expiresIn: "1d" }
     );
 
     sendConfirmationEmail(email, nome, token);
 
     res.status(200).json({
-      message: "Um e-mail de confirmação foi enviado. Verifique sua caixa de entrada.",
+      message:
+        "Um e-mail de confirmação foi enviado. Verifique sua caixa de entrada.",
     });
   } catch (error) {
     console.error("Erro no registro:", error);
@@ -88,7 +94,7 @@ const confirmEmail = async (req, res) => {
       email,
       senha,
       role: role || "morador",
-      isEmailConfirmed: true, 
+      isEmailConfirmed: true,
     });
 
     res.status(201).json({
