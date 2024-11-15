@@ -87,14 +87,22 @@ const register = async (req, res) => {
 const confirmEmail = async (req, res) => {
   const { token } = req.params;
 
+  console.log("Log: Função confirmEmail chamada");
+  console.log("Log: Token recebido = ", token);
+
   try {
     const decoded = jwt.verify(token, jwtSecret);
+    console.log("Log: Token decodificado com sucesso");
+    console.log("Log: Dados decodificados = ", decoded);
 
     const { nome, email, senha, role } = decoded;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(422).json({ errors: ["O e-mail já está registrado."] });
+      console.log("Log: Usuário já registrado com o e-mail = ", email);
+      return res
+        .status(422)
+        .json({ errors: ["O e-mail já está registrado."] });
     }
 
     const newUser = await User.create({
@@ -105,15 +113,20 @@ const confirmEmail = async (req, res) => {
       isEmailConfirmed: true,
     });
 
+    console.log("Log: Novo usuário criado com sucesso");
+    console.log("Log: ID do novo usuário = ", newUser._id);
+
     res.status(201).json({
       _id: newUser._id,
       token: jwt.sign({ id: newUser._id }, jwtSecret, { expiresIn: "7d" }),
       message: "Cadastro confirmado com sucesso!",
     });
   } catch (error) {
+    console.error("Erro ao confirmar o e-mail:", error);
     res.status(400).json({ errors: ["Token inválido ou expirado."] });
   }
 };
+
 
 const login = async (req, res) => {
   const { email, senha } = req.body;
