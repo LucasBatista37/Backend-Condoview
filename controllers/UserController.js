@@ -29,8 +29,16 @@ const sendConfirmationEmail = (email, nome, token) => {
     subject: "Confirmação de Cadastro",
     html: `
       <p>Olá ${nome},</p>
-      <p>Por favor, confirme seu cadastro clicando no link abaixo:</p>
-      <a href="${confirmationUrl}">Confirmar Cadastro</a>
+      <p>Por favor, confirme seu cadastro clicando no botão abaixo:</p>
+      <a href="${confirmationUrl}" style="
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #007BFF;
+        text-decoration: none;
+        border-radius: 5px;
+      ">Confirmar Cadastro</a>
       <p>Atenciosamente,<br>Equipe</p>
     `,
   };
