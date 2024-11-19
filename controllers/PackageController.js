@@ -1,7 +1,9 @@
 const Package = require("../models/Package");
 
 const addPackage = async (req, res) => {
-  const { title, apartment, time, imagePath, type } = req.body;
+  const { title, apartment, time, type } = req.body;
+
+  const imagePath = req.file ? req.file.path : ''; 
 
   console.log("Recebido para adicionar pacote:", {
     title,
@@ -18,7 +20,7 @@ const addPackage = async (req, res) => {
       title,
       apartment,
       time,
-      imagePath,
+      imagePath, 
       type,
       status,
     });
