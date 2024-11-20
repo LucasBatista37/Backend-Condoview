@@ -81,11 +81,11 @@ const approveMaintenance = async (req, res) => {
             return res.status(404).json({ errors: ["Manutenção não encontrada."] });
         }
 
-        if (maintenance.status === 'aprovado') {
+        if (maintenance.status === 'Aprovada') {
             return res.status(400).json({ errors: ["A manutenção já foi aprovada."] });
         }
 
-        maintenance.status = 'aprovado';  
+        maintenance.status = 'Aprovada';  
         await maintenance.save();
 
         res.status(200).json(maintenance);
@@ -104,11 +104,11 @@ const rejectMaintenance = async (req, res) => {
             return res.status(404).json({ errors: ["Manutenção não encontrada."] });
         }
 
-        if (maintenance.status === 'rejeitado') {
+        if (maintenance.status === 'Rejeitada') {
             return res.status(400).json({ errors: ["A manutenção já foi rejeitada."] });
         }
 
-        maintenance.status = 'rejeitado'; 
+        maintenance.status = 'Rejeitada'; 
         await maintenance.save();
 
         res.status(200).json(maintenance);

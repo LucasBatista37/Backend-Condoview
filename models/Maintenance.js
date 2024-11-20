@@ -20,8 +20,8 @@ const MaintenanceSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['pendente', 'aprovado', 'rejeitado'], 
-      default: 'pendente',  
+      enum: ['Pendente', 'Aprovada', 'Rejeitada'], 
+      default: 'Pendente', 
     },
   },
   {
