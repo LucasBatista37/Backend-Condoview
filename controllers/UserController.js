@@ -94,7 +94,7 @@ const getCurrentUser = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { nome, senha } = req.body;
+  const { nome, senha, telefone } = req.body;
 
   let profileImage = null;
 
@@ -114,6 +114,7 @@ const update = async (req, res) => {
       return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
 
+    // Atualizando campos permitidos
     if (nome) {
       user.nome = nome;
     }
@@ -126,6 +127,10 @@ const update = async (req, res) => {
 
     if (profileImage) {
       user.profileImage = profileImage;
+    }
+
+    if (telefone) {
+      user.telefone = telefone;
     }
 
     await user.save();

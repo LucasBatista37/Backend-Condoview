@@ -42,7 +42,11 @@ const userUpdateValidation = () => {
     body("password")
       .optional()
       .isLength({min: 5})
-      .withMessage("A senha precisa ter no mínimo 5 caracteres.")
+      .withMessage("A senha precisa ter no mínimo 5 caracteres."),
+    body("telefone")
+      .optional()
+      .matches(/^\d{10,11}$/)
+      .withMessage("O telefone deve ter 10 ou 11 dígitos."),
   ]
 }
 
