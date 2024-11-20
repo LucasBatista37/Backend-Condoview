@@ -100,9 +100,12 @@ const update = async (req, res) => {
 
   if (req.file) {
     profileImage = req.file.filename;
+    console.log("Log: Arquivo recebido:", req.file);
+    console.log("Log: Nome do arquivo salvo:", profileImage);
   }
 
   const reqUser = req.user;
+  console.log("Log: Dados do usuário autenticado:", reqUser);
 
   try {
     const user = await User.findById(
@@ -110,36 +113,45 @@ const update = async (req, res) => {
     ).select("-senha");
 
     if (!user) {
-      console.log("Usuário não encontrado:", reqUser._id);
+      console.log("Log: Usuário não encontrado para ID:", reqUser._id);
       return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
 
-    // Atualizando campos permitidos
+    console.log("Log: Usuário encontrado para atualização:", user);
+
     if (nome) {
+      console.log("Log: Atualizando nome:", nome);
       user.nome = nome;
     }
 
     if (senha) {
+      console.log("Log: Atualizando senha...");
       const salt = await bcrypt.genSalt();
       const passwordHash = await bcrypt.hash(senha, salt);
       user.senha = passwordHash;
+      console.log("Log: Senha hasheada com sucesso");
     }
 
     if (profileImage) {
+      console.log("Log: Atualizando imagem de perfil:", profileImage);
       user.profileImage = profileImage;
     }
 
     if (telefone) {
+      console.log("Log: Atualizando telefone:", telefone);
       user.telefone = telefone;
     }
 
     await user.save();
+    console.log("Log: Usuário atualizado com sucesso:", user);
+
     res.status(200).json(user);
   } catch (error) {
     console.error("Erro na atualização do usuário:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
+
 
 const getUserById = async (req, res) => {
   const { id } = req.params;
