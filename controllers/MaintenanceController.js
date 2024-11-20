@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 const createMaintenance = async (req, res) => {
   const { type, descriptionMaintenance, dataMaintenance } = req.body;
 
+  if (!type || !descriptionMaintenance || !dataMaintenance) {
+    return res.status(400).json({ errors: ["Todos os campos obrigatórios devem ser preenchidos."] });
+  }
+
   try {
     const imagePath = req.file ? req.file.path : null;
 
@@ -11,12 +15,13 @@ const createMaintenance = async (req, res) => {
       type,
       descriptionMaintenance,
       dataMaintenance,
-      imagePath, 
-      status: "pendente", 
+      imagePath,
+      status: "Pendente",
     });
 
     res.status(201).json(newMaintenance);
   } catch (error) {
+    console.error("Erro ao criar manutenção:", error);
     res.status(500).json({
       errors: ["Houve um erro ao criar a manutenção.", error.message],
     });
