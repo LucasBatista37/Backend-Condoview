@@ -2,7 +2,7 @@ const Reserve = require("../models/Reserve");
 const mongoose = require("mongoose");
 
 const createReserve = async (req, res) => {
-  const { area, descricao, data, horarioInicio, horarioFim } = req.body;
+  const { area, descricao, data, horarioInicio, horarioFim, nomeUsuario } = req.body;
 
   try {
     const newReserve = await Reserve.create({
@@ -11,6 +11,7 @@ const createReserve = async (req, res) => {
       data,
       horarioInicio,
       horarioFim,
+      nomeUsuario, 
       status: "Pendente",
     });
 
@@ -24,7 +25,7 @@ const createReserve = async (req, res) => {
 
 const getReserves = async (req, res) => {
   try {
-    const reserves = await Reserve.find();
+    const reserves = await Reserve.find(); 
     res.status(200).json(reserves);
   } catch (error) {
     res.status(500).json({ errors: ["Erro ao obter reservas."] });

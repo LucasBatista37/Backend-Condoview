@@ -28,6 +28,10 @@ const ReserveSchema = new Schema(
       enum: ['Pendente', 'Aprovada', 'Rejeitada'], 
       default: 'Pendente',  
     },
+    nomeUsuario: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
