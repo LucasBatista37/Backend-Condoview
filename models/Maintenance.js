@@ -20,8 +20,12 @@ const MaintenanceSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['Pendente', 'Aprovada', 'Rejeitada'], 
-      default: 'Pendente', 
+      enum: ['Pendente', 'Aprovada', 'Rejeitada'],
+      default: 'Pendente',
+    },
+    usuarioNome: {
+      type: String,
+      required: true,
     },
   },
   {
@@ -29,7 +33,7 @@ const MaintenanceSchema = new Schema(
   }
 );
 
-
 const Maintenance = mongoose.model("Maintenance", MaintenanceSchema);
 
 module.exports = Maintenance;
+

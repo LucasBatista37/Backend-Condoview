@@ -16,19 +16,19 @@ const ReserveSchema = new Schema(
       required: true,
     },
     horarioInicio: {
-      type: String, 
+      type: String,
       required: true,
     },
     horarioFim: {
-      type: String, 
+      type: String,
       required: true,
     },
     status: {
       type: String,
-      enum: ['Pendente', 'Aprovada', 'Rejeitada'], 
-      default: 'Pendente',  
+      enum: ['Pendente', 'Aprovada', 'Rejeitada'],
+      default: 'Pendente',
     },
-    nomeUsuario: {
+    nomeUsuario: { 
       type: String,
       required: true,
     },
