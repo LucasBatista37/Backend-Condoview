@@ -1,9 +1,11 @@
 const Package = require("../models/Package");
 
-const addPackage = async (req, res) => {
-  const { title, apartment, time, type, usuarioNome } = req.body;
+const path = require('path');
 
-  const imagePath = req.file ? req.file.path : '';
+const addPackage = async (req, res) => {
+  const { title, apartment, time, type, usuarioId } = req.body;
+
+  const imagePath = req.file ? path.basename(req.file.path) : '';
 
   console.log("Recebido para adicionar pacote:", {
     title,
@@ -11,7 +13,7 @@ const addPackage = async (req, res) => {
     time,
     imagePath,
     type,
-    usuarioNome,
+    usuarioId,
   });
 
   try {
@@ -21,10 +23,10 @@ const addPackage = async (req, res) => {
       title,
       apartment,
       time,
-      imagePath,
+      imagePath, 
       type,
       status,
-      usuarioNome,
+      usuarioId, 
     });
 
     console.log("Novo pacote criado antes de salvar:", newPackage);
