@@ -1,9 +1,9 @@
 const Package = require("../models/Package");
 
 const addPackage = async (req, res) => {
-  const { title, apartment, time, type } = req.body;
+  const { title, apartment, time, type, usuarioNome } = req.body;
 
-  const imagePath = req.file ? req.file.path : ''; 
+  const imagePath = req.file ? req.file.path : '';
 
   console.log("Recebido para adicionar pacote:", {
     title,
@@ -11,6 +11,7 @@ const addPackage = async (req, res) => {
     time,
     imagePath,
     type,
+    usuarioNome,
   });
 
   try {
@@ -20,9 +21,10 @@ const addPackage = async (req, res) => {
       title,
       apartment,
       time,
-      imagePath, 
+      imagePath,
       type,
       status,
+      usuarioNome,
     });
 
     console.log("Novo pacote criado antes de salvar:", newPackage);
@@ -47,6 +49,7 @@ const getPackages = async (req, res) => {
     const packages = await Package.find();
     return res.status(200).json(packages);
   } catch (error) {
+    console.error("Erro ao listar encomendas:", error.message);
     return res
       .status(500)
       .json({ message: "Erro ao listar encomendas", error: error.message });

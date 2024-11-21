@@ -33,13 +33,14 @@ const createMaintenance = async (req, res) => {
 
 const getMaintenances = async (req, res) => {
   try {
-    const maintenances = await Maintenance.find();
+    const maintenances = await Maintenance.find(); 
     res.status(200).json(maintenances);
   } catch (error) {
     console.error("Erro ao obter manutenções:", error);
     res.status(500).json({ errors: ["Erro ao obter manutenções."] });
   }
 };
+
 
 const updateMaintenance = async (req, res) => {
   const { id } = req.params;
