@@ -2,9 +2,6 @@ const Package = require("../models/Package");
 
 const path = require("path");
 
-const path = require("path");
-const Package = require("../models/Package"); // Certifique-se de que está correto
-
 const addPackage = async (req, res) => {
   const { title, apartment, time, type, usuarioId, usuarioNome } = req.body;
 
