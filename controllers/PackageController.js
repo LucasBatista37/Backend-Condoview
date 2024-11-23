@@ -20,7 +20,6 @@ const addPackage = async (req, res) => {
   try {
     const status = type === "Entregue" ? "Entregue" : "Pendente";
 
-    // Inclui o campo usuarioNome
     const newPackage = new Package({
       title,
       apartment,
@@ -79,7 +78,7 @@ const getPackageById = async (req, res) => {
 
 const updatePackage = async (req, res) => {
   const { id } = req.params;
-  const { title, apartment, time, imagePath, type } = req.body;
+  const { title, apartment, time, imagePath, type, status } = req.body; // Incluindo 'status'
 
   console.log("Recebido para atualizar pacote. ID:", id, "Dados:", {
     title,
@@ -87,11 +86,10 @@ const updatePackage = async (req, res) => {
     time,
     imagePath,
     type,
+    status,
   });
 
   try {
-    const status = type === "Entregue" ? "Entregue" : "Pendente";
-
     const updatedPackage = await Package.findByIdAndUpdate(
       id,
       {
@@ -100,7 +98,7 @@ const updatePackage = async (req, res) => {
         time,
         imagePath,
         type,
-        status,
+        status, 
       },
       { new: true }
     );
