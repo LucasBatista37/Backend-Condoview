@@ -27,5 +27,4 @@ router.get('/admin/package/:id', getPackageById);
 router.put('/admin/package/:id', upload.single('imagePath'), handleValidationErrors, updatePackage);
 router.delete('/admin/package/:id', deletePackage);
 
-
 module.exports = router;
