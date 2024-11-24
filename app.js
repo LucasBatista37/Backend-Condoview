@@ -19,7 +19,7 @@ app.use(express.urlencoded({extended: false}));
 const routes = require("./routes/Router.js")
 
 // Cors
-app.use(cors({credentials: true, origin: "http://localhost:8080"}))
+app.use(cors({credentials: true, origin: "https://sistema-condo.vercel.app"}))
 
 // diretorio de Upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
