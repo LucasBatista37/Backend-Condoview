@@ -16,21 +16,9 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 5, 
-  },
-});
-
-// Rotas de chat
 router.post(
   "/chat",
   authGuard, 
-  upload.fields([
-    { name: "image", maxCount: 1 }, 
-    { name: "file", maxCount: 1 }, 
-  ]),
   chatValidation(), 
   validate, 
   sendMessage 
