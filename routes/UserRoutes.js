@@ -60,6 +60,6 @@ router.put(
 router.get("/:id", getUserById);
 router.get("/admin/all", getAllUsers);
 router.delete("/admin/:id", authGuard, deleteUser);
-router.post("/admin/associate", authGuard, associateUserToCondominium);
+router.post("/admin/associate", associateUserToCondominium);
 
 module.exports = router;
