@@ -12,9 +12,15 @@ const genereteToken = (id) => {
 };
 
 const register = async (req, res) => {
-  const { nome, email, senha, role } = req.body;
+  const { nome, email, senha, role, condominium } = req.body;
 
-  console.log("Dados recebidos para registro:", { nome, email, senha, role });
+  console.log("Dados recebidos para registro:", {
+    nome,
+    email,
+    senha,
+    role,
+    condominium,
+  });
 
   try {
     const user = await User.findOne({ email });
@@ -36,6 +42,7 @@ const register = async (req, res) => {
       email,
       senha: passwordHash,
       role: role || "morador",
+      condominium: condominium || null,
     });
 
     if (!newUser) {
@@ -152,7 +159,6 @@ const update = async (req, res) => {
   }
 };
 
-
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
@@ -175,7 +181,7 @@ const getUserById = async (req, res) => {
     console.error("Erro ao buscar usuário por ID:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
-}
+};
 
 const getAllUsers = async (req, res) => {
   try {
@@ -215,7 +221,6 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
-
 
 module.exports = {
   register,

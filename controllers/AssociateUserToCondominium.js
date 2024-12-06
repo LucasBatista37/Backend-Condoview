@@ -22,7 +22,7 @@ const associateUserToCondominium = async (req, res) => {
         await user.save();
 
         return res.status(200).json({
-            message: `Usuário ${user.nome} foi associado ao condomínio ${condominium.nome} com sucesso.`,
+            message: `Usuário ${user.nome} foi associado ao condomínio ${condominium.name} com sucesso.`,
             user,
         });
     } catch (error) {

@@ -11,10 +11,10 @@ const userSchema = new Schema(
     apartamento: String,
     role: {
       type: String,
-      enum: ['administrador', 'morador', 'sindico'],
-      default: 'morador',
+      enum: ["administrador", "morador", "sindico"],
+      default: "morador",
     },
-    condominium: { type: mongoose.Schema.Types.ObjectId, ref: 'Condominium' },
+    condominium: { type: mongoose.Schema.Types.ObjectId, ref: "Condominium" },
     isEmailConfirmed: {
       type: Boolean,
       default: false,

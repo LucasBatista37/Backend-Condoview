@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
 
 const {
   createNotice,
@@ -13,12 +12,40 @@ const validate = require("../middlewares/handleValidation");
 const { noticeValidation } = require("../middlewares/warningValidation");
 const authGuard = require("../middlewares/authGuard");
 const adminGuard = require("../middlewares/adminGuard");
+const validateUserCondominium = require("../middlewares/validateUserCondominium");
 
-router.post("/admin/notices", noticeValidation(), validate, createNotice);
-router.delete("/admin/notices/:id", deleteNotice);
-router.put("/admin/notices/:id", validate, updateNotice);
+router.post(
+  "/admin/notices",
+  authGuard,
+  validateUserCondominium, 
+  adminGuard, 
+  noticeValidation(), 
+  validate,
+  createNotice 
+);
 
-router.get("/admin/notices", getNotices);
+router.delete(
+  "/admin/notices/:id",
+  authGuard,
+  validateUserCondominium,
+  adminGuard,
+  deleteNotice
+);
 
+router.put(
+  "/admin/notices/:id",
+  authGuard,
+  validateUserCondominium,
+  adminGuard,
+  validate,
+  updateNotice
+);
+
+router.get(
+  "/admin/notices",
+  authGuard,
+  validateUserCondominium,
+  getNotices
+);
 
 module.exports = router;
