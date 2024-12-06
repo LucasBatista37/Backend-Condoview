@@ -11,20 +11,18 @@ const app = express();
 
 app.use(morgan('dev'));
 
-//Configuração Json e form data response
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
-// routes
 const routes = require("./routes/Router.js")
 
-// Cors
-app.use(cors({credentials: true, origin: "https://sistema-condo.vercel.app"}))
+app.use(cors({
+  credentials: true, 
+  origin: ["https://sistema-condo.vercel.app", "http://localhost:8080"]
+}))
 
-// diretorio de Upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
-// Conexão com banco de dados
 require("./config/db.js")
 
 app.use(routes);
