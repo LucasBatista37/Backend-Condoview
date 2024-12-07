@@ -18,7 +18,6 @@ router.post(
   "/admin/notices",
   authGuard,
   validateUserCondominium, 
-  adminGuard, 
   noticeValidation(), 
   validate,
   createNotice 
@@ -28,7 +27,6 @@ router.delete(
   "/admin/notices/:id",
   authGuard,
   validateUserCondominium,
-  adminGuard,
   deleteNotice
 );
 
@@ -36,7 +34,6 @@ router.put(
   "/admin/notices/:id",
   authGuard,
   validateUserCondominium,
-  adminGuard,
   validate,
   updateNotice
 );
