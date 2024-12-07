@@ -10,7 +10,7 @@ const adminGuard = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
-        if (decoded.role !== "admin") {
+        if (decoded.role !== "administrador") {
             return res.status(403).json({ errors: ["Acesso negado. Somente administradores podem acessar esta rota."] });
         }
 
