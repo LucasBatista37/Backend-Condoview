@@ -7,5 +7,3 @@ node_modules/
 
 # Ignorar arquivos de configuração local
 *.env
-
-uploads/
