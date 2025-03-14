@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const Occurrence = require("../models/Occurrence");
+const admin = require("../firebaseAdmin");
 
 async function criarOcorrencia(req, res) {
   try {
@@ -26,10 +27,31 @@ async function criarOcorrencia(req, res) {
     });
 
     console.log("Nova ocorrência a ser salva:", novaOcorrencia);
-
     await novaOcorrencia.save();
-
     console.log("Ocorrência criada com sucesso:", novaOcorrencia);
+
+    const admins = await User.find({ role: "administrador", fcmToken: { $ne: null } });
+
+    if (admins.length > 0) {
+      const tokens = admins.map(admin => admin.fcmToken);
+
+      const notification = {
+        tokens: tokens,
+        notification: {
+          title: "Nova Ocorrência",
+          body: `Motivo: ${req.body.motivo}`,
+        },
+      };
+
+      admin.messaging().sendEachForMulticast(notification)
+        .then(response => {
+          console.log("Notificação enviada com sucesso:", response);
+        })
+        .catch(error => {
+          console.error("Erro ao enviar notificação:", error);
+        });
+    }
+
     return res.status(201).json(novaOcorrencia);
   } catch (error) {
     console.error("Erro ao criar a ocorrência:", error);

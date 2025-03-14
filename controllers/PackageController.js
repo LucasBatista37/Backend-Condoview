@@ -1,6 +1,7 @@
 const Package = require("../models/Package");
-
-const path = require("path");
+const User = require("../models/User");
+const admin = require("firebase-admin");
+const path = require("path")
 
 const addPackage = async (req, res) => {
   const { title, apartment, time, type, usuarioId, usuarioNome } = req.body;
@@ -32,10 +33,36 @@ const addPackage = async (req, res) => {
     });
 
     console.log("Novo pacote criado antes de salvar:", newPackage);
-
     await newPackage.save();
-
     console.log("Pacote salvo no banco de dados:", newPackage);
+
+    const morador = await User.findOne({ _id: usuarioId });
+
+    if (!morador || !morador.fcmToken) {
+      console.warn(`Usuário ${usuarioId} não encontrado ou sem FCM Token.`);
+      return res.status(201).json({
+        message: "Encomenda adicionada, mas o morador não possui FCM Token",
+        newPackage,
+      });
+    }
+
+    const notification = {
+      token: morador.fcmToken,
+      notification: {
+        title: "Nova Encomenda Chegou!",
+        body: `Olá, ${usuarioNome}, uma encomenda chegou para você.`,
+      },
+    };
+
+    admin
+      .messaging()
+      .send(notification)
+      .then((response) => {
+        console.log("Notificação enviada com sucesso:", response);
+      })
+      .catch((error) => {
+        console.error("Erro ao enviar notificação:", error);
+      });
 
     return res
       .status(201)

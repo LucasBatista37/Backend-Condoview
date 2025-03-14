@@ -28,6 +28,11 @@ const ChatMessageSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    unreadMessages: {
+      type: Map,
+      of: Number, 
+      default: {}
+    }
   },
   {
     timestamps: true,

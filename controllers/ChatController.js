@@ -1,67 +1,105 @@
 const ChatMessage = require("../models/ChatMessage");
 const mongoose = require("mongoose");
+const admin = require("../firebaseAdmin");
+const User = require("../models/User");
 
 const sendMessage = async (req, res) => {
-  const { message } = req.body;
-
-  console.log("---- Início do envio de mensagem ----");
-  console.log("Dados recebidos no corpo:", req.body);
-  console.log("Arquivos recebidos no 'req.files':", req.files);
-
-  let imageUrl = null;
-  let fileUrl = null;
-
-  if (req.files) {
-    console.log("Arquivos estão presentes no 'req.files'.");
-
-    if (req.files.image && req.files.image.length > 0) {
-      imageUrl = req.files.image[0].path;
-      console.log("Caminho da imagem recebido:", imageUrl);
-    } else {
-      console.log("Nenhuma imagem foi recebida no campo 'image'.");
-    }
-
-    if (req.files.file && req.files.file.length > 0) {
-      fileUrl = req.files.file[0].path;
-      console.log("Caminho do arquivo recebido:", fileUrl);
-    } else {
-      console.log("Nenhum arquivo foi recebido no campo 'file'.");
-    }
-  } else {
-    console.log("Nenhum arquivo foi recebido no 'req.files'.");
-  }
-
   try {
-    const userId = req.user.id;
-    const userName = req.user.nome;
+    console.log("---- Início do envio de mensagem ----");
+    console.log("Dados recebidos no corpo:", req.body);
+
+    if (!req.user) {
+      return res.status(401).json({ error: "Usuário não autenticado." });
+    }
+
+    const { message } = req.body;  
+    if (!message) {
+      return res.status(400).json({ error: "Mensagem não pode ser vazia." });
+    }
+
+    const userId = req.user.id?.toString(); 
+    const userName = req.user.nome || "Usuário desconhecido";
 
     console.log("ID do usuário:", userId);
     console.log("Nome do usuário:", userName);
 
+    if (!userId) {
+      return res.status(400).json({ error: "ID do usuário não encontrado." });
+    }
+
     const newMessage = await ChatMessage.create({
-      userId: userId, 
-      userName: userName,
-      message: message || "",
-      imageUrl: imageUrl,
-      fileUrl: fileUrl,
+      userId,
+      userName,
+      message,
     });
 
-    console.log("Mensagem criada com sucesso no banco de dados:", newMessage);
+    console.log("Mensagem salva no banco:", newMessage);
 
-    res.status(201).json(newMessage);
+    const participantes = await User.find({
+      fcmToken: { $ne: null },
+    });
+
+    await Promise.all(participantes.map(async (user) => {
+      if (!user.unreadMessages) {
+        user.unreadMessages = new Map();
+      }
+
+      user.unreadMessages.set("general", (user.unreadMessages.get("general") || 0) + 1);
+      await user.save();
+    }));
+
+    if (participantes.length > 0) {
+      const tokens = participantes.map(user => user.fcmToken);
+
+      const notification = {
+        tokens: tokens,
+        notification: {
+          title: `${userName} enviou uma nova mensagem`,
+          body: message,
+        },
+        data: {
+          senderId: userId,
+          senderName: userName,
+          unreadCount: participantes.length.toString(),
+        },
+      };
+
+      try {
+        const response = await admin.messaging().sendEachForMulticast(notification);
+        console.log("Resposta do Firebase:", response);
+        response.responses.forEach((resp, index) => {
+          if (!resp.success) {
+            console.error(`Erro ao enviar notificação para o token ${tokens[index]}:`, resp.error);
+          }
+        });
+      } catch (error) {
+        console.error("Erro geral ao enviar notificação:", error);
+      }
+    } else {
+      console.log("Nenhum usuário para notificar.");
+    }
+
+    return res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Erro ao enviar a mensagem:", error);
-    res
-      .status(500)
-      .json({ errors: ["Erro ao enviar a mensagem.", error.message] });
+    console.error("Erro ao enviar mensagem:", error.message);
+    return res.status(500).json({ error: error.message });
   }
 };
 
 const getMessages = async (req, res) => {
   try {
-    const messages = await ChatMessage.find().sort({ timestamp: 1 });
+    const { conversationId } = req.params;
+    const userId = req.user.id;
+
+    await User.updateOne(
+      { _id: userId },
+      { $unset: { [`unreadMessages.${conversationId}`]: 1 } }
+    );
+
+    const messages = await ChatMessage.find({ conversationId }).sort({ timestamp: 1 });
     res.status(200).json(messages);
   } catch (error) {
+    console.error("Erro ao obter mensagens:", error.message);
     res.status(500).json({ errors: ["Erro ao obter mensagens do chat."] });
   }
 };
