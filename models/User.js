@@ -9,6 +9,7 @@ const userSchema = new Schema(
     profileImage: String,
     telefone: String,
     apartamento: String,
+    fcmToken: { type: String, default: null },
     role: {
       type: String,
       enum: ["administrador", "morador", "sindico"],

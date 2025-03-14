@@ -12,7 +12,6 @@ router.use("/api/users", require("./ChatRoutes"));
 router.use("/api/users", require("./PersonalChatRoutes"));
 router.use("/api/users", require("./CondominiumRoutes"));
 
-
 router.get("/", (req, res) => {
     res.send("API Working!");
 })

@@ -41,9 +41,16 @@ const {
   userUpdateValidation,
 } = require("../middlewares/userValidation");
 
+const { sendNotification } = require("../controllers/notificationController");
+
 const authGuard = require("../middlewares/authGuard");
 
+const {
+  saveFcmToken,
+} = require("../controllers/UserController");
+
 router.post("/register", userCreateValidation(), validate, register);
+
 router.post("/login", loginValidation(), validate, login);
 
 router.get("/profile", authGuard, getCurrentUser);
@@ -61,5 +68,7 @@ router.get("/:id", getUserById);
 router.get("/admin/all", getAllUsers);
 router.delete("/admin/:id", authGuard, deleteUser);
 router.post("/admin/associate", associateUserToCondominium);
+router.post("/save-fcm-token", saveFcmToken);
+router.post("/send-notification", sendNotification);
 
 module.exports = router;

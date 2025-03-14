@@ -222,6 +222,31 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const saveFcmToken = async (req, res) => {
+  const { userId, fcmToken } = req.body;
+
+  if (!userId || !fcmToken) {
+    return res.status(400).json({ error: "User ID e FCM Token são obrigatórios." });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { fcmToken },
+      { new: true, upsert: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.status(200).json({ success: true, message: "FCM Token atualizado!", user });
+  } catch (error) {
+    console.error("Erro ao salvar FCM Token:", error);
+    res.status(500).json({ error: "Erro ao salvar FCM Token." });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -230,4 +255,5 @@ module.exports = {
   getUserById,
   getAllUsers,
   deleteUser,
+  saveFcmToken,
 };
