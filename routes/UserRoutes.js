@@ -27,6 +27,7 @@ const {
   update,
   getUserById,
   getAllUsers,
+  verifyEmail,
   deleteUser,
 } = require("../controllers/UserController");
 
@@ -35,6 +36,7 @@ const {
 } = require("../controllers/AssociateUserToCondominium");
 
 const validate = require("../middlewares/handleValidation");
+
 const {
   userCreateValidation,
   loginValidation,
@@ -70,5 +72,6 @@ router.delete("/admin/:id", authGuard, deleteUser);
 router.post("/admin/associate", associateUserToCondominium);
 router.post("/save-fcm-token", saveFcmToken);
 router.post("/send-notification", sendNotification);
+router.get("/verify/:token", verifyEmail);
 
 module.exports = router;

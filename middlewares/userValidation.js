@@ -24,11 +24,11 @@ const loginValidation = () => {
   return [
     body("email")
       .isString()
-      .withMessage("O e-mail é obrigatório.")
+      .notEmpty().withMessage("O e-mail é obrigatório.") 
       .isEmail()
-      .withMessage("insira um e-mail válido"),
+      .withMessage("Insira um e-mail válido"),
     body("senha")
-      .isString().withMessage("A senha é obrigatória")
+      .notEmpty().withMessage("A senha é obrigatória.") 
   ];
 };
 

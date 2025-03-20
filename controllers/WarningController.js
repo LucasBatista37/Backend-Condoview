@@ -1,6 +1,7 @@
 const Notice = require("../models/Warning");
 const mongoose = require("mongoose");
 const admin = require("../firebaseAdmin");
+const User = require("../models/User"); 
 
 const createNotice = async (req, res) => {
   const { title, message, date } = req.body;

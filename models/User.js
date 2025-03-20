@@ -9,6 +9,8 @@ const userSchema = new Schema(
     profileImage: String,
     telefone: String,
     apartamento: String,
+    isVerified: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },   
     fcmToken: { type: String, default: null },
     role: {
       type: String,

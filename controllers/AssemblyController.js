@@ -16,7 +16,6 @@ const createAssembly = async (req, res) => {
       status = "Em Andamento";
     }
 
-    // Criação da nova assembleia
     const newAssembly = await Assembly.create({
       title,
       description,
@@ -26,7 +25,6 @@ const createAssembly = async (req, res) => {
 
     console.log("Nova assembleia criada com sucesso:", newAssembly);
 
-    // Buscar todos os usuários que são moradores (não administradores) e que possuem FCM Token
     const moradores = await User.find({
       role: "morador",
       fcmToken: { $ne: null },

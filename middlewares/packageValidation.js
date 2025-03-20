@@ -6,8 +6,7 @@ const packageValidation = () => {
             .isString()
             .withMessage("O título é obrigatório.")
             .isLength({ min: 3 })
-            .withMessage("O título deve ter pelo menos 3 caracteres."),
-        
+            .withMessage("O título deve ter pelo menos 3 caracteres."),    
         body("apartment")
             .isString()
             .withMessage("O apartamento é obrigatório."),

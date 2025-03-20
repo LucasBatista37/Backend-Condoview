@@ -2,8 +2,23 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 
 const jwtSecret = process.env.JWT_SECRET;
+const emailUser = process.env.EMAIL_USER; 
+const emailPass = process.env.EMAIL_PASS; 
+
+const generateVerificationToken = (id) => {
+  return jwt.sign({ id }, jwtSecret, { expiresIn: "24h" });
+};
+
+const transporter = nodemailer.createTransport({
+  service: "gmail", 
+  auth: {
+    user: emailUser,
+    pass: emailPass,
+  },
+});
 
 const genereteToken = (id) => {
   return jwt.sign({ id }, jwtSecret, {
@@ -14,28 +29,15 @@ const genereteToken = (id) => {
 const register = async (req, res) => {
   const { nome, email, senha, role, condominium } = req.body;
 
-  console.log("Dados recebidos para registro:", {
-    nome,
-    email,
-    senha,
-    role,
-    condominium,
-  });
-
   try {
     const user = await User.findOne({ email });
 
     if (user) {
-      console.log("Usuário já existe:", email);
-      res.status(422).json({ errors: ["Por favor, utilize outro e-mail"] });
-      return;
+      return res.status(422).json({ errors: ["Por favor, utilize outro e-mail"] });
     }
 
     const salt = await bcrypt.genSalt();
-    console.log("Salt gerado:", salt);
-
     const passwordHash = await bcrypt.hash(senha, salt);
-    console.log("Senha hasheada:", passwordHash);
 
     const newUser = await User.create({
       nome,
@@ -43,25 +45,53 @@ const register = async (req, res) => {
       senha: passwordHash,
       role: role || "morador",
       condominium: condominium || null,
+      isVerified: false, 
     });
 
-    if (!newUser) {
-      console.log("Erro ao criar novo usuário");
-      res.status(422).json({
-        errors: "Houve um erro, por favor tente novamente mais tarde.",
-      });
-      return;
-    }
+    const verificationToken = generateVerificationToken(newUser._id);
 
-    console.log("Novo usuário criado:", newUser);
+    const verificationLink = `http://localhost:5000/api/users/verify/${verificationToken}`;
+
+    await transporter.sendMail({
+      from: `"Condoview" <${emailUser}>`,
+      to: newUser.email,
+      subject: "Verifique seu e-mail",
+      html: `<p>Olá, ${newUser.nome}, clique no link abaixo para verificar sua conta:</p>
+             <a href="${verificationLink}">Verificar Conta</a>`,
+    });
 
     res.status(201).json({
-      _id: newUser._id,
-      token: genereteToken(newUser._id),
+      message: "Usuário cadastrado! Verifique seu e-mail para ativar a conta.",
     });
+
   } catch (error) {
-    console.error("Erro no registro:", error);
-    res.status(500).json({ errors: ["Erro interno do servidor."] });
+    res.status(500).json({ errors: ["Erro no servidor, tente novamente mais tarde."] });
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    const userId = decoded.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ errors: ["Usuário não encontrado."] });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Conta já verificada." });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    res.json({ message: "Conta verificada com sucesso!" });
+
+  } catch (error) {
+    res.status(400).json({ errors: ["Token inválido ou expirado."] });
   }
 };
 
@@ -72,14 +102,22 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log("Usuário não encontrado:", email);
       res.status(404).json({ errors: ["Usuário não encontrado."] });
       return;
     }
 
     if (!(await bcrypt.compare(senha, user.senha))) {
-      console.log("Senha inválida para usuário:", email);
       res.status(422).json({ erros: ["Senha inválida"] });
+      return;
+    }
+
+    if (!user.isVerified) {
+      res.status(403).json({ errors: ["Conta não verificada. Por favor, verifique seu e-mail."] });
+      return;
+    }
+
+    if (user.isBlocked) {
+      res.status(403).json({ errors: ["Sua conta foi bloqueada. Entre em contato com o suporte."] });
       return;
     }
 
@@ -107,8 +145,6 @@ const update = async (req, res) => {
 
   if (req.file) {
     profileImage = req.file.filename;
-    console.log("Log: Arquivo recebido:", req.file);
-    console.log("Log: Nome do arquivo salvo:", profileImage);
   }
 
   const reqUser = req.user;
@@ -120,41 +156,31 @@ const update = async (req, res) => {
     ).select("-senha");
 
     if (!user) {
-      console.log("Log: Usuário não encontrado para ID:", reqUser._id);
       return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
 
-    console.log("Log: Usuário encontrado para atualização:", user);
-
     if (nome) {
-      console.log("Log: Atualizando nome:", nome);
       user.nome = nome;
     }
 
     if (senha) {
-      console.log("Log: Atualizando senha...");
       const salt = await bcrypt.genSalt();
       const passwordHash = await bcrypt.hash(senha, salt);
       user.senha = passwordHash;
-      console.log("Log: Senha hasheada com sucesso");
     }
 
     if (profileImage) {
-      console.log("Log: Atualizando imagem de perfil:", profileImage);
       user.profileImage = profileImage;
     }
 
     if (telefone) {
-      console.log("Log: Atualizando telefone:", telefone);
       user.telefone = telefone;
     }
 
     await user.save();
-    console.log("Log: Usuário atualizado com sucesso:", user);
 
     res.status(200).json(user);
   } catch (error) {
-    console.error("Erro na atualização do usuário:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
@@ -163,7 +189,6 @@ const getUserById = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    console.log("ID inválido:", id);
     return res.status(400).json({ errors: ["ID inválido fornecido."] });
   }
 
@@ -173,12 +198,10 @@ const getUserById = async (req, res) => {
     );
 
     if (!user) {
-      console.log("Usuário não encontrado para o ID:", id);
       return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
     res.status(200).json(user);
   } catch (error) {
-    console.error("Erro ao buscar usuário por ID:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
@@ -188,13 +211,11 @@ const getAllUsers = async (req, res) => {
     const users = await User.find().select("-senha");
 
     if (!users || users.length === 0) {
-      console.log("Nenhum usuário encontrado");
       return res.status(404).json({ errors: ["Nenhum usuário encontrado!"] });
     }
 
     res.status(200).json(users);
   } catch (error) {
-    console.error("Erro ao buscar todos os usuários:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
@@ -203,7 +224,6 @@ const deleteUser = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    console.log("ID inválido:", id);
     return res.status(400).json({ errors: ["ID inválido fornecido."] });
   }
 
@@ -211,13 +231,11 @@ const deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(id);
 
     if (!user) {
-      console.log("Usuário não encontrado para exclusão:", id);
       return res.status(404).json({ errors: ["Usuário não encontrado!"] });
     }
 
     res.status(200).json({ message: "Usuário excluído com sucesso." });
   } catch (error) {
-    console.error("Erro ao excluir usuário:", error);
     res.status(500).json({ errors: ["Erro interno do servidor."] });
   }
 };
@@ -242,7 +260,6 @@ const saveFcmToken = async (req, res) => {
 
     res.status(200).json({ success: true, message: "FCM Token atualizado!", user });
   } catch (error) {
-    console.error("Erro ao salvar FCM Token:", error);
     res.status(500).json({ error: "Erro ao salvar FCM Token." });
   }
 };
@@ -256,4 +273,5 @@ module.exports = {
   getAllUsers,
   deleteUser,
   saveFcmToken,
+  verifyEmail,
 };

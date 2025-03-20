@@ -4,13 +4,13 @@ const assemblyValidation = () => {
     return [
         body("title")
             .isString()
-            .withMessage("O título da assembleia é obrigatório.")
+            .notEmpty().withMessage("O título da assembleia é obrigatório.")
             .isLength({ min: 3 })
             .withMessage("O título da assembleia deve ter pelo menos 3 caracteres."),
         
         body("description")
             .isString()
-            .withMessage("A descrição da assembleia é obrigatória.")
+            .notEmpty().withMessage("A descrição da assembleia é obrigatória.")
             .isLength({ min: 5 })
             .withMessage("A descrição da assembleia deve ter pelo menos 5 caracteres."),
         
