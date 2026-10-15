@@ -1,10 +1,11 @@
-# Ignorar arquivos de log
-*.log
-
-# Ignorar diretórios de build
-/build/
 node_modules/
-
-# Ignorar arquivos de configuração local
+*.log
+/build/
+.env
 *.env
+!.env.example
 serviceAccountKey.json
+# Arquivos enviados por usuários nunca devem ir para o repositório
+uploads/
+storage/
+coverage/
