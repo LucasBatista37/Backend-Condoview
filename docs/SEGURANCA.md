@@ -31,6 +31,7 @@ login), **Alta**, **Média**, **Baixa**.
 | 16 | Média | Segredos no histórico do Git: credenciais Gerencianet/Efí (sandbox) em `config/config.js` (commit `7c6bbc8`). Arquivos de usuários (fotos e PDF) versionados em `uploads/`. | Arquivos removidos do índice e `uploads/` no `.gitignore`. **O histórico público não foi reescrito** (sem force push). | **Ação do titular:** revogar/rotacionar as credenciais; avaliar a remoção dos arquivos do histórico (ex.: `git filter-repo`) com consciência do impacto. |
 | 17 | Baixa | Sem cabeçalhos de segurança; `X-Powered-By` exposto; CORS com `credentials: true` e origem localhost. | `helmet`, `x-powered-by` desativado, CORS só para origens configuradas. | `account.test.js › cabeçalhos de segurança` |
 | 18 | Baixa | Dependências com vulnerabilidades conhecidas (multer 1.x, nodemailer 6.x, gerencianet sem uso). | Atualizadas (multer 2, nodemailer 10, firebase-admin 14, express 4.22); `gerencianet` removido. `npm audit --omit=dev`: 0 vulnerabilidades em 15/10/2026. | `npm audit` |
+| 19 | Baixa | *Encontrado na revisão da v2 (não existia na original, que não tinha votação real)*: ao excluir a conta, votos no modo "um voto por morador" mantinham o id do usuário na chave do eleitor. | A exclusão troca a chave por um valor aleatório e remove o vínculo; o total apurado não muda. | `account.test.js › votos permanecem no resultado, sem identificar quem votou` (falhava antes da correção) |
 
 ## Pontos que dependem do titular / limitações conhecidas
 

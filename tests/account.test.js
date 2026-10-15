@@ -31,6 +31,30 @@ describe("Exclusão de conta", () => {
     expect((await request(app).get("/api/me").set(u.auth)).status).toBe(401);
   });
 
+  test("votos permanecem no resultado, sem identificar quem votou", async () => {
+    const condo = await createCondo("Votos");
+    const sindico = await createUser(app, { condo, role: "sindico" });
+    const u = await createUser(app, { condo, apartamento: "7" });
+    const created = await request(app).post("/api/assemblies").set(sindico.auth).send({
+      title: "Assembleia",
+      scheduledAt: new Date(Date.now() + 86400000).toISOString(),
+      voterScope: "user",
+      pautas: [{ tema: "Pauta única", descricao: "Teste" }],
+    });
+    const { id, pautas } = created.body;
+    await request(app).post(`/api/assemblies/${id}/open`).set(sindico.auth);
+    const v = await request(app).post(`/api/assemblies/${id}/votes`).set(u.auth).send({ pautaId: pautas[0].id, choice: "Sim" });
+    expect(v.status).toBe(201);
+
+    expect((await request(app).delete("/api/me").set(u.auth).send({ senha: PASSWORD })).status).toBe(200);
+
+    const votes = await models.Vote.find({ assembly: id }).lean();
+    expect(votes).toHaveLength(1);
+    expect(votes[0].choice).toBe("Sim");
+    expect(votes[0].user).toBeUndefined();
+    expect(JSON.stringify(votes[0])).not.toContain(String(u.user._id));
+  });
+
   test("pela página web (exigência do Google Play)", async () => {
     const u = await createUser(app);
     const page = await request(app).get("/conta/excluir");

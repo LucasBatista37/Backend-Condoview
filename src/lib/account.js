@@ -1,5 +1,6 @@
 "use strict";
 
+const crypto = require("crypto");
 const models = require("../models");
 
 /**
@@ -10,7 +11,8 @@ const models = require("../models");
  *   imagens enviadas e foto de perfil.
  * - Mensagens do chat: o conteúdo é apagado e o autor passa a "Conta excluída".
  * - Votos em assembleias: mantidos sem vínculo com a pessoa (o resultado da
- *   assembleia não pode mudar retroativamente).
+ *   assembleia não pode mudar retroativamente); sem id do usuário nem na
+ *   chave do eleitor.
  * - Avisos publicados como gestor: mantidos, sem o autor.
  */
 async function deleteAccount(user, files) {
@@ -38,7 +40,19 @@ async function deleteAccount(user, files) {
     { userId: uid },
     { $set: { message: "", image: null, userName: "Conta excluída", deletedAt: new Date() } }
   );
-  await models.Vote.updateMany({ user: uid }, { $unset: { user: 1 } });
+  // Votos: o total apurado não muda, mas nada aponta mais para a pessoa.
+  // No modo "um voto por morador" a chave do eleitor continha o id do usuário;
+  // ela é trocada por um valor aleatório (mantém o índice único por pauta).
+  const personalVotes = await models.Vote.find({
+    $or: [{ user: uid }, { voterKey: `user:${uid}` }],
+  }).select("voterKey");
+  for (const v of personalVotes) {
+    const update = { $unset: { user: 1 } };
+    if (v.voterKey === `user:${uid}`) {
+      update.$set = { voterKey: `removido:${crypto.randomBytes(12).toString("hex")}` };
+    }
+    await models.Vote.updateOne({ _id: v._id }, update);
+  }
   await models.Notice.updateMany({ author: uid }, { $unset: { author: 1 } });
   await models.User.updateMany({ blockedUsers: uid }, { $pull: { blockedUsers: uid } });
 
