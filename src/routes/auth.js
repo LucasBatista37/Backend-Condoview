@@ -10,6 +10,9 @@ const serialize = require("../lib/serialize");
 const { htmlPage } = require("../lib/html");
 
 const BCRYPT_COST = 12;
+const RESET_WINDOW_MS = 60 * 60 * 1000;
+const RESET_MAX_CODES = 5;
+const RESET_MAX_ATTEMPTS = 5;
 // Hash fixo usado quando o e-mail não existe, para igualar o tempo de resposta.
 const DUMMY_HASH = bcrypt.hashSync("condoview-dummy-password-1", 10);
 
@@ -139,13 +142,22 @@ module.exports = function authRoutes(ctx) {
     limiters.auth,
     asyncHandler(async (req, res) => {
       const { email } = validate(req.body, { email: rules.email() });
-      const user = await User.findOne({ email });
-      if (user) {
+      const user = await User.findOne({ email }).select("+passwordReset");
+      const now = Date.now();
+      const prev = user?.passwordReset;
+      const sameWindow = prev?.windowStart && now - prev.windowStart.getTime() < RESET_WINDOW_MS;
+      const issued = sameWindow ? prev.issued || 0 : 0;
+      const attempts = sameWindow ? prev.attempts || 0 : 0;
+      // Limite por conta (além do limite por IP): no máximo RESET_MAX_CODES códigos e
+      // RESET_MAX_ATTEMPTS tentativas erradas por hora. A resposta é sempre a mesma.
+      if (user && issued < RESET_MAX_CODES && attempts < RESET_MAX_ATTEMPTS) {
         const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
         user.passwordReset = {
           codeHash: hashCode(code, config.jwtSecret),
-          expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-          attempts: 0,
+          expiresAt: new Date(now + 15 * 60 * 1000),
+          attempts,
+          issued: issued + 1,
+          windowStart: sameWindow ? prev.windowStart : new Date(now),
         };
         await user.save();
         await mailer.send({
@@ -170,7 +182,7 @@ module.exports = function authRoutes(ctx) {
       const user = await User.findOne({ email: data.email }).select("+passwordReset");
       const reset = user?.passwordReset;
       const invalid = () => badRequest("Código inválido ou expirado.", { code: "invalid_code" });
-      if (!reset?.codeHash || reset.expiresAt < new Date() || reset.attempts >= 5) throw invalid();
+      if (!reset?.codeHash || reset.expiresAt < new Date() || reset.attempts >= RESET_MAX_ATTEMPTS) throw invalid();
 
       const expected = Buffer.from(reset.codeHash, "hex");
       const given = Buffer.from(hashCode(data.code, config.jwtSecret), "hex");

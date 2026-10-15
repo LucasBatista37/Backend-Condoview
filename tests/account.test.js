@@ -1,6 +1,6 @@
 "use strict";
 
-const { setup, teardown, createCondo, createUser, futureDate, PASSWORD, models, request } = require("./helpers");
+const { setup, teardown, createCondo, createUser, futureDate, jpegWithExif, PASSWORD, models, request } = require("./helpers");
 
 let app;
 beforeAll(async () => ({ app } = await setup()));
@@ -28,6 +28,7 @@ describe("Exclusão de conta", () => {
     const m = await models.ChatMessage.findById(msg.body.id);
     expect(m.message).toBe("");
     expect(m.userName).toBe("Conta excluída");
+    expect(String(m.userId)).not.toBe(String(u.user._id));
     expect((await request(app).get("/api/me").set(u.auth)).status).toBe(401);
   });
 
@@ -53,6 +54,24 @@ describe("Exclusão de conta", () => {
     expect(votes[0].choice).toBe("Sim");
     expect(votes[0].user).toBeUndefined();
     expect(JSON.stringify(votes[0])).not.toContain(String(u.user._id));
+  });
+
+  test("gestor que exclui a conta não leva junto a foto da encomenda de outro morador", async () => {
+    const condo = await createCondo("Gestor sai");
+    const sindico = await createUser(app, { condo, role: "sindico" });
+    const morador = await createUser(app, { condo, apartamento: "3" });
+    const pkg = await request(app).post("/api/packages").set(sindico.auth)
+      .field("recipientId", String(morador.user._id)).field("title", "Caixa")
+      .attach("image", jpegWithExif(), { filename: "p.jpg", contentType: "image/jpeg" });
+    expect(pkg.status).toBe(201);
+    expect((await request(app).delete("/api/me").set(sindico.auth).send({ senha: PASSWORD })).status).toBe(200);
+
+    const stored = await models.Package.findById(pkg.body.id).lean();
+    expect(stored.receivedBy).toBeUndefined();
+    const list = await request(app).get("/api/packages").set(morador.auth);
+    const url = list.body.find((p) => p.id === pkg.body.id).imageUrl;
+    expect(url).toBeTruthy();
+    expect((await request(app).get(url).set(morador.auth)).status).toBe(200);
   });
 
   test("pela página web (exigência do Google Play)", async () => {

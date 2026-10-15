@@ -52,7 +52,15 @@ const UserSchema = new Schema(
     blockedUsers: { type: [{ type: ObjectId, ref: "User" }], default: [] },
     passwordReset: {
       type: new Schema(
-        { codeHash: String, expiresAt: Date, attempts: { type: Number, default: 0 } },
+        {
+          codeHash: String,
+          expiresAt: Date,
+          // Tentativas erradas e códigos emitidos são contados por janela de 1 h,
+          // e NÃO zeram quando um novo código é pedido.
+          attempts: { type: Number, default: 0 },
+          issued: { type: Number, default: 0 },
+          windowStart: Date,
+        },
         { _id: false }
       ),
       default: null,

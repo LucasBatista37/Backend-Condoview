@@ -139,6 +139,13 @@ describe("Visitantes — QR validado no servidor", () => {
     expect(res.body.valid).toBe(false);
     const forged = await request(app).post("/api/visitors/validate").set(A.sindico.auth).send({ payload: JSON.stringify({ data: "01/01/2030", hora: "10:00" }) });
     expect(forged.body.valid).toBe(false);
+    // assinatura com caracteres fora do formato ou comprimento diferente: recusa sem erro 500
+    for (const sig of ["é…", "x".repeat(31), "x".repeat(33), invite.qrPayload.split(".")[2] + "A"]) {
+      const odd = `CV1.${invite.qrPayload.split(".")[1]}.${sig}`;
+      const r = await request(app).post("/api/visitors/validate").set(A.sindico.auth).send({ payload: odd });
+      expect(r.status).toBe(200);
+      expect(r.body.valid).toBe(false);
+    }
   });
 
   test("convite de A não é aceito na portaria de B", async () => {

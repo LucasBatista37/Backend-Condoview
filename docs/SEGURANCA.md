@@ -33,6 +33,21 @@ login), **Alta**, **Média**, **Baixa**.
 | 18 | Baixa | Dependências com vulnerabilidades conhecidas (multer 1.x, nodemailer 6.x, gerencianet sem uso). | Atualizadas (multer 2, nodemailer 10, firebase-admin 14, express 4.22); `gerencianet` removido. `npm audit --omit=dev`: 0 vulnerabilidades em 15/10/2026. | `npm audit` |
 | 19 | Baixa | *Encontrado na revisão da v2 (não existia na original, que não tinha votação real)*: ao excluir a conta, votos no modo "um voto por morador" mantinham o id do usuário na chave do eleitor. | A exclusão troca a chave por um valor aleatório e remove o vínculo; o total apurado não muda. | `account.test.js › votos permanecem no resultado, sem identificar quem votou` (falhava antes da correção) |
 
+### Achados da revisão independente da v2 (15/10/2026)
+
+Um revisor separado (sem participar da implementação) auditou a v2. Os achados
+abaixo foram reproduzidos, corrigidos e cobertos por testes que **falhavam antes
+da correção**.
+
+| # | Gravidade | Achado (v2) | Correção | Reteste |
+|---|---|---|---|---|
+| 20 | Média | Remoção de EXIF "falhava aberta": JPEG com bytes `0xFF` de preenchimento antes de um marcador (permitido pela norma) era gravado **com** o GPS. | Leitura tolera preenchimento; descarta dados após o fim da imagem e segmentos MPF (imagens secundárias); se a estrutura não puder ser lida, o envio é **recusado** (422) em vez de gravado. PNG idem. Verificado também que os JPEGs reais limpos continuam decodificáveis. | `files.test.js` (JPEG real baseline e progressivo, preenchimento, dados anexados, malformado → 422) |
+| 21 | Baixa | Roteadores montados em `/` aplicavam `requireCondo` a todas as rotas seguintes: conta ainda sem condomínio recebia 403 ao abrir a própria foto. | Middleware restrito aos caminhos de cada módulo. | `files.test.js › conta ainda sem condomínio consegue ver a própria foto` |
+| 22 | Baixa | Assinatura do QR com caracteres não ASCII causava erro 500 (`timingSafeEqual` com tamanhos diferentes). Só gestores alcançavam a rota; falhava fechado. | Formato exigido (32 caracteres base64url) antes da comparação. | `rules.test.js › QR adulterado é recusado` |
+| 23 | Baixa | Recuperação de senha: pedir um novo código zerava o contador de tentativas; o limite efetivo era só o por IP. | Tentativas e códigos contados por conta numa janela de 1 h (máx. 5 códigos e 5 tentativas erradas), sem alterar a resposta (não revela se a conta existe). | `auth.test.js › pedir um novo código não zera…`, `› no máximo 5 códigos por hora…` |
+| 24 | Baixa | Exclusão de conta deixava o id da pessoa em mensagens anonimizadas do chat e em ações como gestor (aprovações, históricos, recebimento de encomendas, entradas de visitantes); a exclusão de um gestor apagava fotos de encomendas de outros moradores. | Autor aleatório por mensagem; referências removidas; fotos de encomendas de terceiros mantidas sem dono identificável. | `account.test.js › pelo app…`, `› gestor que exclui a conta…` |
+| 25 | Baixa (aceito) | `POST /api/residents/link`: o gestor descobre se um e-mail tem conta (404/409) e pode vincular uma conta sem confirmação do titular; a resposta inclui nome, e-mail e telefone. | **Não alterado** — é o fluxo combinado (o morador informa o e-mail à administração). Recomendação: confirmação do morador no app antes do vínculo e limite por gestor. | — |
+
 ## Pontos que dependem do titular / limitações conhecidas
 
 - **Produção não foi alterada.** Até o deploy da v2, o servidor atual
@@ -45,6 +60,10 @@ login), **Alta**, **Média**, **Baixa**.
 - **Papel de portaria**: não existe papel "porteiro"; a validação de QR Code é
   feita por síndico/administração. Criar um papel dedicado é uma evolução
   possível.
+- **Sigilo do voto**: a API nunca mostra votos individuais, só totais; mas no
+  modo "um voto por unidade" os moradores da mesma unidade veem o voto
+  registrado pela unidade, e quem administra o banco consegue associar votos a
+  contas existentes. Não é votação secreta no sentido criptográfico.
 - **Unicidade de e-mail**: a v2 cria um índice único em `users.email`. Se a base
   atual tiver duplicados, o índice não será criado até a limpeza.
 - **Verificação em produção**: repetir os testes de isolamento com contas de

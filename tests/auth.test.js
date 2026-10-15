@@ -146,6 +146,28 @@ describe("Recuperação de senha", () => {
     expect(res.status).toBe(400);
   });
 
+  test("pedir um novo código não zera as tentativas erradas (limite por conta e por hora)", async () => {
+    const { email } = await createUser(app);
+    const lastCode = () => ctx.mailer.outbox.filter((m) => m.to === email).pop()?.text.match(/\b(\d{6})\b/)[1];
+    await request(app).post("/api/auth/forgot-password").send({ email });
+    const first = lastCode();
+    const wrong = first === "123456" ? "654321" : "123456";
+    for (let i = 0; i < 5; i += 1) await request(app).post("/api/auth/reset-password").send({ email, code: wrong, senha: "Outra1234" });
+    const resets = () => ctx.mailer.outbox.filter((m) => m.to === email && /redefinir/.test(m.subject)).length;
+    const sentBefore = resets();
+    const again = await request(app).post("/api/auth/forgot-password").send({ email });
+    expect(again.status).toBe(200); // mesma resposta, mas nenhum código novo é emitido
+    expect(resets()).toBe(sentBefore);
+    const res = await request(app).post("/api/auth/reset-password").send({ email, code: first, senha: "Outra1234" });
+    expect(res.status).toBe(400);
+  });
+
+  test("no máximo 5 códigos por hora para a mesma conta", async () => {
+    const { email } = await createUser(app);
+    for (let i = 0; i < 7; i += 1) await request(app).post("/api/auth/forgot-password").send({ email });
+    expect(ctx.mailer.outbox.filter((m) => m.to === email && /redefinir/.test(m.subject))).toHaveLength(5);
+  });
+
   test("resposta igual para e-mail inexistente", async () => {
     const res = await request(app).post("/api/auth/forgot-password").send({ email: "ninguem@teste.dev" });
     expect(res.status).toBe(200);

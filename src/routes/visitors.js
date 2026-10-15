@@ -111,11 +111,14 @@ module.exports = function visitorRoutes(ctx) {
       const parts = payload.trim().split(".");
       if (parts.length !== 3 || parts[0] !== "CV1" || !mongoose.Types.ObjectId.isValid(parts[1]))
         return reject("Este QR Code não é um convite do Condoview.");
+      // Assinatura: exatamente 32 caracteres base64url (comprimento fixo em bytes
+      // para a comparação em tempo constante).
+      if (!/^[A-Za-z0-9_-]{32}$/.test(parts[2])) return reject("Convite inválido ou adulterado.");
 
       const invite = await VisitorInvite.findOne({ _id: parts[1] }).select("+nonce");
-      const expected = invite ? Buffer.from(sign(String(invite._id), invite.nonce)) : Buffer.alloc(32);
-      const given = Buffer.from(parts[2].padEnd(32).slice(0, 32));
-      const sigOk = crypto.timingSafeEqual(expected.length === 32 ? expected : Buffer.alloc(32), given) && Boolean(invite);
+      const expected = Buffer.from(invite ? sign(String(invite._id), invite.nonce) : "0".repeat(32), "latin1");
+      const given = Buffer.from(parts[2], "latin1");
+      const sigOk = crypto.timingSafeEqual(expected, given) && Boolean(invite);
       if (!sigOk) return reject("Convite inválido ou adulterado.");
       if (String(invite.condominium) !== String(req.condoId)) return reject("Este convite é de outro condomínio.");
       if (invite.revokedAt) return reject("Convite revogado pelo morador.", invite);

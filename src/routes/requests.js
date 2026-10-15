@@ -29,7 +29,8 @@ const OCCURRENCE_TRANSITIONS = {
 module.exports = function requestRoutes(ctx) {
   const { auth, files, notify } = ctx;
   const router = express.Router();
-  router.use(auth.requireAuth, auth.requireCondo);
+  // Só nos caminhos deste módulo (montado em "/"): não interfere em /files, /chat etc.
+  router.use(["/maintenance", "/occurrences", "/packages"], auth.requireAuth, auth.requireCondo);
 
   const scopeFilter = (req, ownerField) => {
     const filter = { condominium: req.condoId };

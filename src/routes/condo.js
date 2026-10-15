@@ -10,7 +10,8 @@ const serialize = require("../lib/serialize");
 module.exports = function condoRoutes(ctx) {
   const { auth } = ctx;
   const router = express.Router();
-  router.use(auth.requireAuth, auth.requireCondo);
+  // Só nos caminhos deste módulo (montado em "/"): não interfere em /files, /chat etc.
+  router.use(["/condominium", "/residents"], auth.requireAuth, auth.requireCondo);
 
   router.get(
     "/condominium",
