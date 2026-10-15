@@ -52,13 +52,13 @@ async function seedDemo({ timeZone = "America/Sao_Paulo" } = {}) {
   ]);
 
   await m.Maintenance.create([
-    { condominium: condo._id, user: morador._id, usuarioNome: morador.nome, apartamento: morador.apartamento, type: "Hidráulica", descriptionMaintenance: "Vazamento no registro do corredor do 1º andar.", dataMaintenance: addDays(today, 3), status: "Pendente", history: [{ status: "Pendente", by: morador._id, note: "Solicitação aberta", at: ago(20) }] },
-    { condominium: condo._id, user: vizinho._id, usuarioNome: vizinho.nome, apartamento: vizinho.apartamento, type: "Iluminação", descriptionMaintenance: "Lâmpada queimada na escada do Bloco B.", dataMaintenance: addDays(today, 1), status: "Aprovada", history: [{ status: "Pendente", by: vizinho._id, at: ago(50) }, { status: "Aprovada", by: sindico._id, note: "Eletricista agendado", at: ago(26) }] },
+    { condominium: condo._id, user: morador._id, usuarioNome: morador.nome, apartamento: morador.apartamento, type: "Hidráulica", descriptionMaintenance: "Vazamento no registro do corredor do 1º andar.", dataMaintenance: addDays(today, 3), status: "Pendente", createdAt: ago(20), history: [{ status: "Pendente", by: morador._id, note: "Solicitação aberta", at: ago(20) }] },
+    { condominium: condo._id, user: vizinho._id, usuarioNome: vizinho.nome, apartamento: vizinho.apartamento, type: "Iluminação", descriptionMaintenance: "Lâmpada queimada na escada do Bloco B.", dataMaintenance: addDays(today, 1), status: "Aprovada", createdAt: ago(50), history: [{ status: "Pendente", by: vizinho._id, at: ago(50) }, { status: "Aprovada", by: sindico._id, note: "Eletricista agendado", at: ago(26) }] },
   ]);
 
   await m.Occurrence.create([
-    { condominium: condo._id, userId: morador._id, usuarioNome: morador.nome, apartamento: morador.apartamento, motivo: "Barulho após as 22h", descricao: "Som alto vindo do andar de cima no sábado.", data: addDays(today, -2), status: "Em análise", resposta: "Vamos conversar com a unidade.", history: [{ status: "Aberta", by: morador._id, at: ago(40) }, { status: "Em análise", by: sindico._id, note: "Vamos conversar com a unidade.", at: ago(10) }] },
-    { condominium: condo._id, userId: vizinha._id, usuarioNome: vizinha.nome, apartamento: vizinha.apartamento, motivo: "Vaga ocupada", descricao: "Carro desconhecido na vaga 204.", data: addDays(today, -1), status: "Aberta", history: [{ status: "Aberta", by: vizinha._id, at: ago(6) }] },
+    { condominium: condo._id, userId: morador._id, usuarioNome: morador.nome, apartamento: morador.apartamento, motivo: "Barulho após as 22h", descricao: "Som alto vindo do andar de cima no sábado.", data: addDays(today, -2), status: "Em análise", resposta: "Vamos conversar com a unidade.", createdAt: ago(40), history: [{ status: "Aberta", by: morador._id, at: ago(40) }, { status: "Em análise", by: sindico._id, note: "Vamos conversar com a unidade.", at: ago(10) }] },
+    { condominium: condo._id, userId: vizinha._id, usuarioNome: vizinha.nome, apartamento: vizinha.apartamento, motivo: "Vaga ocupada", descricao: "Carro desconhecido na vaga 204.", data: addDays(today, -1), status: "Aberta", createdAt: ago(6), history: [{ status: "Aberta", by: vizinha._id, at: ago(6) }] },
   ]);
 
   await m.Package.create([

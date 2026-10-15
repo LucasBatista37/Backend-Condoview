@@ -12,7 +12,11 @@ async function main() {
   await mongoose.connect(config.mongoUri);
   console.log("Banco de dados conectado.");
   const app = createApp(config);
-  app.listen(config.port, () => console.log(`Condoview API na porta ${config.port}`));
+  const server = app.listen(config.port, () => console.log(`Condoview API na porta ${config.port}`));
+  // Mantém conexões ociosas por mais tempo que o balanceador do provedor,
+  // evitando que clientes reaproveitem conexões já fechadas.
+  server.keepAliveTimeout = 65 * 1000;
+  server.headersTimeout = 66 * 1000;
 }
 
 main().catch((err) => {

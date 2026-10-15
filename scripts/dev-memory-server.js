@@ -25,10 +25,12 @@ const { seedDemo } = require("./seed-demo");
   await Promise.all(Object.values(mongoose.models).map((mdl) => mdl.syncIndexes()));
   const config = { ...load(), uploadDir: fs.mkdtempSync(path.join(os.tmpdir(), "condoview-dev-")) };
   const seeded = await seedDemo({ timeZone: config.condoTimeZone });
-  createApp(config).listen(config.port, "0.0.0.0", () => {
+  const server = createApp(config).listen(config.port, "0.0.0.0", () => {
     console.log(`API de desenvolvimento em http://localhost:${config.port}`);
     console.log(`Contas demo (senha ${seeded.password}): sindica@demo.condoview, morador@demo.condoview, nova@demo.condoview`);
   });
+  server.keepAliveTimeout = 65 * 1000;
+  server.headersTimeout = 66 * 1000;
 })().catch((err) => {
   console.error(err);
   process.exit(1);
